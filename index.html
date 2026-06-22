@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>优选库</title>
 <link rel="icon" sizes="56x56" href="https://pan.ling-lu-02.ccwu.cc/raw/------/2.jpg">
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
@@ -114,13 +113,14 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
 #subResult { 
     background: rgba(0,0,0,0.5); 
     color: #60a5fa; 
-    font-size: 14px; 
+    font-size: 13px; 
     cursor: pointer; 
     padding: 14px 16px;
     border-radius: 12px;
     border: 1px solid rgba(96, 165, 250, 0.2);
     word-break: break-all;
     width: 100%;
+    min-height: 50px;
 }
 .footer { 
     margin-top: 24px; 
@@ -129,9 +129,6 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     color: #64748b; 
     line-height: 1.8; 
 }
-#qrWrap { display: none; justify-content: center; margin-top: 20px; }
-#qrCodeBox { background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-#qrCodeBox img { display: block; }
 #customBaseGroup, #customUrlGroup { display: none; margin-top: 8px; }
 .loading-text { color: #94a3b8; font-size: 13px; text-align: center; margin-top: 8px; }
 .hidden { display: none; }
@@ -160,12 +157,11 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     border: 1px solid rgba(96, 165, 250, 0.3);
     color: #60a5fa;
 }
-.node-count {
-    color: #94a3b8;
-    font-size: 12px;
-    text-align: center;
-    margin-top: 8px;
-}
+.copy-hint { color: #64748b; font-size: 12px; text-align: center; margin-top: 6px; }
+.btn-group { display: flex; gap: 8px; margin-top: 8px; }
+.btn-group button { flex: 1; padding: 10px; font-size: 14px; }
+.btn-secondary { background: rgba(255,255,255,0.08) !important; }
+.btn-secondary:hover { background: rgba(255,255,255,0.15) !important; box-shadow: none !important; }
 
 @media (max-width: 480px) {
     body { padding: 12px; }
@@ -219,12 +215,13 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     <div id="statusBox" class="status-box"></div>
     
     <div class="form-group" style="margin-top: 20px;">
-        <label>📋 您的订阅链接（点击复制）</label>
+        <label>📋 您的订阅链接 (Base64编码)</label>
         <input type="text" id="subResult" placeholder="点击生成后自动出现" readonly onclick="copyLink()">
-    </div>
-    
-    <div id="qrWrap">
-        <div id="qrCodeBox"></div>
+        <div class="copy-hint">💡 点击输入框自动复制订阅链接</div>
+        <div class="btn-group">
+            <button onclick="copyLink()" class="btn-secondary" style="margin-top:0;">📋 复制链接</button>
+            <button onclick="downloadSub()" class="btn-secondary" style="margin-top:0;">💾 下载文件</button>
+        </div>
     </div>
 
     <div class="footer">优选库 &copy; 2026 | 纯前端生成</div>
@@ -252,7 +249,7 @@ const EXTERNAL_SOURCES = {
 };
 
 // ==========================================
-// 核心工具函数（修复类型检查）
+// 核心工具函数
 // ==========================================
 function encodeBase64(str) {
     try {
@@ -270,26 +267,18 @@ function decodeBase64(str) {
     }
 }
 
-// 修复：确保输入是字符串
 function parseIP(ip) {
-    // 确保是字符串
     if (typeof ip !== 'string') {
         ip = String(ip || '');
     }
-    
     if (!ip || ip.trim() === '') {
         return { displayIp: '', port: '443', name: '' };
     }
-    
-    // 移除首尾空格
     ip = ip.trim();
-    
-    // 匹配 IP:端口#名称 格式
     const match = ip.match(/^(\[[a-fA-F0-9:]+\]|[^:#\[\]]+)(?::(\d+))?(#.*)?$/);
     if (!match) {
         return { displayIp: ip, port: '443', name: '' };
     }
-    
     return {
         displayIp: match[1],
         port: match[2] || '443',
@@ -297,15 +286,10 @@ function parseIP(ip) {
     };
 }
 
-function createErrorNode(msg) {
-    return `vless://00000000-0000-0000-0000-000000000000@127.0.0.1:80?encryption=none&security=none&type=tcp#${encodeURIComponent(msg)}`;
-}
-
 // ==========================================
 // 核心订阅引擎
 // ==========================================
 function multiplexLink(baseLink, ipRow, index) {
-    // 确保 ipRow 是字符串
     if (typeof ipRow === 'string') {
         ipRow = { ip: ipRow, name: '' };
     }
@@ -319,7 +303,6 @@ function multiplexLink(baseLink, ipRow, index) {
     const nodeName = `☆优选库 | 公益 | 免费 | ${nodeNumber}☆`;
 
     try {
-        // VLESS / Trojan
         if (baseLink.startsWith('vless://') || baseLink.startsWith('trojan://')) {
             const url = new URL(baseLink);
             const originalHost = url.hostname;
@@ -336,7 +319,6 @@ function multiplexLink(baseLink, ipRow, index) {
             }
             return url.toString();
         } 
-        // VMess
         else if (baseLink.startsWith('vmess://')) {
             const b64 = baseLink.slice(8).replace(/-/g, '+').replace(/_/g, '/');
             const config = JSON.parse(decodeBase64(b64));
@@ -385,6 +367,25 @@ function copyLink() {
     }
 }
 
+function downloadSub() {
+    const res = document.getElementById('subResult');
+    if (res.value) {
+        // 下载为 .txt 文件
+        const blob = new Blob([res.value], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'subscribe.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showStatus('✅ 文件下载成功！', 'success');
+    } else {
+        showStatus('⚠️ 请先生成订阅链接', 'error');
+    }
+}
+
 function showStatus(msg, type = 'info') {
     const box = document.getElementById('statusBox');
     box.className = 'status-box ' + type;
@@ -406,7 +407,6 @@ async function generateSub() {
     const sourceId = parseInt(document.getElementById('extUrlSelect').value);
     const customUrl = document.getElementById('customUrl').value.trim();
 
-    // 验证
     if (baseLinkId === 3 && !customBaseLink) {
         showStatus('❌ 请填写自定义节点链接！', 'error');
         return;
@@ -419,13 +419,8 @@ async function generateSub() {
     const btn = document.getElementById('genBtn');
     const loadingMsg = document.getElementById('loadingMsg');
     const subResult = document.getElementById('subResult');
-    const qrWrap = document.getElementById('qrWrap');
-    const qrCodeBox = document.getElementById('qrCodeBox');
 
-    // 重置状态
     subResult.value = '';
-    qrWrap.style.display = 'none';
-    qrCodeBox.innerHTML = '';
     hideStatus();
 
     btn.innerText = '⏳ 生成中...';
@@ -433,7 +428,6 @@ async function generateSub() {
     loadingMsg.classList.remove('hidden');
 
     try {
-        // 1. 获取基础节点
         let baseLink;
         if (baseLinkId === 3) {
             baseLink = customBaseLink;
@@ -445,13 +439,11 @@ async function generateSub() {
             }
         }
 
-        // 验证基础节点格式
         if (!baseLink.startsWith('vless://') && !baseLink.startsWith('vmess://') && !baseLink.startsWith('trojan://')) {
             showStatus('❌ 基础节点格式无效，请检查链接', 'error');
             return;
         }
 
-        // 2. 获取优选IP源
         let extUrl;
         if (sourceId === 9) {
             extUrl = customUrl;
@@ -465,7 +457,6 @@ async function generateSub() {
 
         showStatus('⏳ 正在拉取优选IP列表...', 'info');
 
-        // 3. 拉取优选IP列表
         let ipList = [];
         try {
             const controller = new AbortController();
@@ -485,7 +476,6 @@ async function generateSub() {
                 throw new Error('返回的是HTML网页，不是IP列表');
             }
 
-            // 解析IP列表
             const lines = text.split('\n')
                 .map(l => l.trim())
                 .filter(l => l && !l.startsWith('#') && !l.startsWith('//'));
@@ -494,7 +484,6 @@ async function generateSub() {
                 throw new Error('IP列表为空');
             }
 
-            // 直接存储原始行，后续解析
             ipList = lines;
 
         } catch (e) {
@@ -508,13 +497,11 @@ async function generateSub() {
 
         showStatus(`✅ 成功获取 ${ipList.length} 个IP，正在生成节点...`, 'success');
 
-        // 4. 生成节点
         const MAX_NODES = 500;
         const processCount = Math.min(ipList.length, MAX_NODES);
         const generatedLinks = [];
 
         for (let i = 0; i < processCount; i++) {
-            // 直接传递IP字符串
             const ipStr = ipList[i];
             const link = multiplexLink(baseLink, ipStr, i);
             if (link) generatedLinks.push(link);
@@ -526,32 +513,12 @@ async function generateSub() {
         }
 
         const finalOutput = generatedLinks.join('\n');
-
-        // 5. 生成订阅（Base64编码）
+        
+        // Base64编码 - 这是正确的订阅格式
         const encoded = encodeBase64(finalOutput);
         
-        // 创建 data URI
-        const dataUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(encoded);
-        
-        // 显示结果
-        subResult.value = dataUri;
-
-        // 6. 生成二维码
-        qrCodeBox.innerHTML = '';
-        qrWrap.style.display = 'flex';
-        try {
-            new QRCode(qrCodeBox, {
-                text: dataUri,
-                width: 160,
-                height: 160,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.M
-            });
-        } catch (e) {
-            console.warn('二维码生成失败:', e);
-            qrWrap.style.display = 'none';
-        }
+        // 显示Base64编码的订阅链接
+        subResult.value = encoded;
 
         showStatus(`✅ 生成成功！共 ${generatedLinks.length} 个节点`, 'success');
 
