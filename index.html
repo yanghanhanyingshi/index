@@ -7,6 +7,7 @@
 <link rel="icon" sizes="56x56" href="https://pan.ling-lu-02.ccwu.cc/raw/------/9527.jpg">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
+
 body { 
     background: #0a0a1a; 
     min-height: 100vh; 
@@ -15,168 +16,379 @@ body {
     justify-content: center; 
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
     padding: 16px; 
+    position: relative;
+    overflow-x: hidden;
 }
+
+/* 动态渐变背景 */
 body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    background: 
+        radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 50%, rgba(167, 139, 250, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, #0a0a1a 70%);
+    z-index: -1;
+    animation: bgFloat 20s ease-in-out infinite alternate;
+}
+
+@keyframes bgFloat {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    33% { transform: translate(2%, -2%) rotate(1deg) scale(1.02); }
+    66% { transform: translate(-1%, 1%) rotate(-1deg) scale(0.98); }
+    100% { transform: translate(1%, -1%) rotate(0deg) scale(1); }
+}
+
+/* 动态光晕 */
+body::after {
     content: '';
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, #0a0a1a 70%);
+    background: 
+        radial-gradient(circle at 30% 20%, rgba(96, 165, 250, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 70% 80%, rgba(167, 139, 250, 0.05) 0%, transparent 50%);
     z-index: -1;
+    animation: glowPulse 8s ease-in-out infinite alternate;
 }
+
+@keyframes glowPulse {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* 玻璃卡片 - 增强磨砂感 */
 .card { 
-    background: rgba(255,255,255,0.05); 
-    backdrop-filter: blur(20px); 
-    -webkit-backdrop-filter: blur(20px); 
-    padding: 24px 20px; 
-    border-radius: 24px; 
+    background: rgba(255,255,255,0.04); 
+    backdrop-filter: blur(40px) saturate(1.4);
+    -webkit-backdrop-filter: blur(40px) saturate(1.4);
+    padding: 28px 24px; 
+    border-radius: 28px; 
     width: 100%; 
     max-width: 440px; 
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6); 
-    border: 1px solid rgba(255,255,255,0.08); 
+    box-shadow: 
+        0 30px 80px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -1px 0 rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* 卡片顶部光晕 */
+.card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+/* 卡片底部反光 */
+.card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+}
+
 .avatar { 
-    width: 64px; 
-    height: 64px; 
+    width: 72px; 
+    height: 72px; 
     border-radius: 50%; 
-    margin: 0 auto 16px; 
+    margin: 0 auto 18px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
     overflow: hidden; 
-    border: 2px solid rgba(255,255,255,0.1);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    position: relative;
 }
+
+.avatar::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(167, 139, 250, 0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
 h1 { 
-    font-size: 22px; 
+    font-size: 24px; 
     text-align: center; 
-    margin-bottom: 28px; 
-    font-weight: 600; 
-    letter-spacing: 0.5px; 
-    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    margin-bottom: 30px; 
+    font-weight: 700; 
+    letter-spacing: 1px; 
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    background-size: 200% 200%;
+    animation: gradientShift 6s ease-in-out infinite alternate;
 }
-.form-group { margin-bottom: 16px; }
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+.form-group { margin-bottom: 18px; }
+
 label { 
     display: block; 
-    font-size: 13px; 
+    font-size: 12px; 
     margin-bottom: 6px; 
-    color: #94a3b8; 
+    color: rgba(148, 163, 184, 0.8);
     font-weight: 500; 
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
+
 input, select { 
     width: 100%; 
     padding: 14px 16px; 
-    background: rgba(0,0,0,0.4); 
-    border: 1px solid rgba(255,255,255,0.08); 
-    border-radius: 12px; 
+    background: rgba(0,0,0,0.35); 
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; 
     color: #f1f5f9; 
     font-size: 15px; 
     transition: all 0.3s ease; 
     -webkit-appearance: none;
     appearance: none;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
+
 input:focus, select:focus { 
     outline: none; 
-    border-color: #3b82f6; 
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); 
-    background: rgba(0,0,0,0.6); 
+    border-color: rgba(96, 165, 250, 0.4);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), inset 0 0 20px rgba(59, 130, 246, 0.03);
+    background: rgba(0,0,0,0.5); 
 }
-input::placeholder { color: #64748b; }
+
+input::placeholder { color: rgba(100, 116, 139, 0.6); }
+
 select { 
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 16px center;
     padding-right: 40px;
+    cursor: pointer;
 }
-select option { color: #000; background: #1e293b; }
+
+select option { color: #e2e8f0; background: #1e293b; }
+
 button { 
     width: 100%; 
-    padding: 14px; 
-    background: linear-gradient(135deg, #3b82f6, #6366f1); 
+    padding: 15px; 
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(99, 102, 241, 0.85));
     color: #fff; 
     border: none; 
-    border-radius: 12px; 
+    border-radius: 14px; 
     font-size: 16px; 
     font-weight: 600; 
     cursor: pointer; 
-    transition: all 0.3s; 
-    margin-top: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 6px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
 }
-button:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3); }
-button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+button:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 40px rgba(59, 130, 246, 0.35);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(99, 102, 241, 0.95));
+}
+
+button:disabled { 
+    opacity: 0.5; 
+    cursor: not-allowed; 
+    transform: none; 
+    box-shadow: none; 
+}
+
 #subResult { 
-    background: rgba(0,0,0,0.5); 
-    color: #60a5fa; 
+    background: rgba(0,0,0,0.35); 
+    color: rgba(96, 165, 250, 0.9); 
     font-size: 13px; 
     cursor: pointer; 
     padding: 14px 16px;
-    border-radius: 12px;
-    border: 1px solid rgba(96, 165, 250, 0.2);
+    border-radius: 14px;
+    border: 1px solid rgba(96, 165, 250, 0.1);
     word-break: break-all;
     width: 100%;
     min-height: 50px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
 }
+
+#subResult:hover {
+    border-color: rgba(96, 165, 250, 0.2);
+    background: rgba(0,0,0,0.45);
+}
+
 .footer { 
     margin-top: 24px; 
     text-align: center; 
     font-size: 12px; 
-    color: #64748b; 
+    color: rgba(100, 116, 139, 0.6);
     line-height: 1.8; 
+    letter-spacing: 0.3px;
 }
+
 #customBaseGroup, #customUrlGroup { display: none; margin-top: 8px; }
-.loading-text { color: #94a3b8; font-size: 13px; text-align: center; margin-top: 8px; }
+
+.loading-text { 
+    color: rgba(148, 163, 184, 0.8); 
+    font-size: 13px; 
+    text-align: center; 
+    margin-top: 10px; 
+}
+
 .hidden { display: none; }
+
 .status-box {
     margin-top: 12px;
     padding: 12px 16px;
-    border-radius: 12px;
+    border-radius: 14px;
     font-size: 13px;
     display: none;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.05);
 }
+
 .status-box.success {
     display: block;
-    background: rgba(34, 197, 94, 0.15);
-    border: 1px solid rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.15);
     color: #4ade80;
 }
+
 .status-box.error {
     display: block;
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.15);
     color: #f87171;
 }
+
 .status-box.info {
     display: block;
-    background: rgba(96, 165, 250, 0.15);
-    border: 1px solid rgba(96, 165, 250, 0.3);
+    background: rgba(96, 165, 250, 0.08);
+    border-color: rgba(96, 165, 250, 0.15);
     color: #60a5fa;
 }
-.copy-hint { color: #64748b; font-size: 12px; text-align: center; margin-top: 6px; }
-.btn-group { display: flex; gap: 8px; margin-top: 8px; }
-.btn-group button { flex: 1; padding: 10px; font-size: 14px; }
-.btn-secondary { background: rgba(255,255,255,0.08) !important; }
-.btn-secondary:hover { background: rgba(255,255,255,0.15) !important; box-shadow: none !important; }
+
+.copy-hint { 
+    color: rgba(100, 116, 139, 0.5); 
+    font-size: 12px; 
+    text-align: center; 
+    margin-top: 6px; 
+}
+
+.btn-group { 
+    display: flex; 
+    gap: 10px; 
+    margin-top: 10px; 
+}
+
+.btn-group button { 
+    flex: 1; 
+    padding: 10px; 
+    font-size: 14px; 
+    margin-top: 0;
+}
+
+.btn-secondary { 
+    background: rgba(255,255,255,0.05) !important; 
+    box-shadow: none !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.btn-secondary:hover { 
+    background: rgba(255,255,255,0.1) !important; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+    transform: translateY(-1px);
+}
+
+.btn-secondary::before { display: none; }
 
 @media (max-width: 480px) {
     body { padding: 12px; }
-    .card { padding: 20px 16px; border-radius: 20px; }
+    .card { padding: 20px 16px; border-radius: 22px; }
     h1 { font-size: 20px; margin-bottom: 24px; }
     input, select { padding: 12px 14px; font-size: 16px; }
     button { padding: 14px; font-size: 15px; }
-    .avatar { width: 56px; height: 56px; }
+    .avatar { width: 60px; height: 60px; }
+}
+
+@media (prefers-color-scheme: light) {
+    body { background: #e8ecf4; }
+    body::before {
+        background: 
+            radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+            radial-gradient(ellipse at 80% 50%, rgba(167, 139, 250, 0.06) 0%, transparent 60%),
+            radial-gradient(ellipse at 50% 0%, #dce3f0 0%, #e8ecf4 70%);
+    }
+    .card { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.15); }
+    input, select, #subResult { background: rgba(255,255,255,0.15); color: #1e293b; }
+    input::placeholder { color: rgba(100, 116, 139, 0.5); }
+    label { color: rgba(71, 85, 105, 0.8); }
+    .footer { color: rgba(100, 116, 139, 0.6); }
+    select option { color: #1e293b; background: #f1f5f9; }
+    .btn-secondary { background: rgba(255,255,255,0.2) !important; border-color: rgba(255,255,255,0.1); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.3) !important; }
+    #subResult { color: #3b82f6; border-color: rgba(59, 130, 246, 0.15); }
 }
 </style>
 </head>
 <body>
 <div class="card">
     <div class="avatar"><img src="https://pan.ling-lu-02.ccwu.cc/raw/------/9527.jpg" alt="Logo"></div>
-    <h1>优选订阅</h1>
+    <h1>✦ 优选订阅 ✦</h1>
     
     <div class="form-group">
         <label>基础节点</label>
@@ -223,7 +435,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
         </div>
     </div>
 
-    <div class="footer">优选库 &copy; 2026 </div>
+    <div class="footer">优选库 &copy; 2026</div>
 </div>
 <script>
 // ==========================================
@@ -535,7 +747,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('extUrlSelect').value = '2';
     toggleCustomBase();
     toggleCustomUrl();
-    
 });
 </script>
 </body>
