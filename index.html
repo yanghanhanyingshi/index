@@ -299,7 +299,8 @@ function multiplexLink(baseLink, ipRow, index) {
     if (!displayIp) return null;
     
     const nodeNumber = String(index + 1).padStart(3, '0');
-    const nodeName = `☆优选库 | 公益 | 免费 | ${nodeNumber}☆`;
+    // 修改节点名称，加入优选IP地址，便于客户端显示
+    const nodeName = `☆优选库 | ${displayIp} | ${nodeNumber}☆`;
 
     try {
         if (baseLink.startsWith('vless://') || baseLink.startsWith('trojan://')) {
