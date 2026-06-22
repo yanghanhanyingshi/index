@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>优选库</title>
+<title>优选库 - IP列表</title>
 <link rel="icon" sizes="56x56" href="https://pan.ling-lu-02.ccwu.cc/raw/------/2.jpg">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -176,30 +176,8 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
 <body>
 <div class="card">
     <div class="avatar"><img src="https://pan.ling-lu-02.ccwu.cc/raw/------/2.jpg" alt="Logo"></div>
-    <h1>优选订阅</h1>
+    <h1>优选IP订阅</h1>
     
-    <div class="form-group">
-        <label>📦 输出模式</label>
-        <select id="outputMode" onchange="toggleMode()">
-            <option value="ip">🌐 纯IP列表</option>
-            <option value="node" selected>🔗 生成VLESS节点</option>
-        </select>
-    </div>
-
-    <div class="form-group" id="baseNodeGroup">
-        <label>基础节点模板</label>
-        <select id="baseLinkSelect" onchange="toggleCustomBase()">
-            <option value="0">🌐 基础节点 ①</option>
-            <option value="1">🔄 基础节点 ②</option>
-            <option value="2">🔄 基础节点 ③</option>
-            <option value="3">✍️ 自定义节点</option>
-        </select>
-        <div id="customBaseGroup">
-            <input type="text" id="customBaseLink" placeholder="请输入有效 VLESS 链接" autocomplete="off">
-        </div>
-        <div style="margin-top:6px;font-size:12px;color:#64748b;">💡 选择基础节点作为模板，IP将替换到节点中</div>
-    </div>
-
     <div class="form-group">
         <label>优选 IP 来源</label>
         <select id="extUrlSelect" onchange="toggleCustomUrl()">
@@ -219,13 +197,13 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
         </div>
     </div>
 
-    <button onclick="generateSub()" id="genBtn">🚀 生成优选订阅</button>
-    <div id="loadingMsg" class="loading-text hidden">⏳ 正在获取优选IP并生成订阅，请稍候...</div>
+    <button onclick="generateSub()" id="genBtn">🚀 获取优选IP</button>
+    <div id="loadingMsg" class="loading-text hidden">⏳ 正在拉取优选IP列表，请稍候...</div>
     <div id="statusBox" class="status-box"></div>
     
     <div class="form-group" style="margin-top: 20px;">
         <label>📋 您的订阅链接 (Base64编码)</label>
-        <input type="text" id="subResult" placeholder="点击生成后自动出现" readonly onclick="copyLink()">
+        <input type="text" id="subResult" placeholder="点击获取后自动出现" readonly onclick="copyLink()">
         <div class="copy-hint">💡 点击输入框自动复制订阅链接</div>
         <div class="btn-group">
             <button onclick="copyLink()" class="btn-secondary" style="margin-top:0;">📋 复制链接</button>
@@ -233,18 +211,12 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
         </div>
     </div>
 
-    <div class="footer">优选库 &copy; 2026 | 纯前端生成</div>
+    <div class="footer">优选库 &copy; 2026 | 纯前端IP列表</div>
 </div>
 <script>
 // ==========================================
 // 全局配置
 // ==========================================
-const PRESET_BASE_LINKS = {
-    0: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@saas.sin.fan:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#%E7%81%B5%E9%B9%BF%E4%BC%98%E9%80%89%20%7C%20Canada%20%7C%20078',
-    1: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@cf.877774.xyz:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#cf.877774.xyz',
-    2: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@www.visa.cn:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#www.visa.cn'
-};
-
 const EXTERNAL_SOURCES = {
     0: 'https://cf.junzhen.qzz.io/best_ips_bj.txt',
     1: 'https://cf.junzhen.qzz.io/best_ips.txt',
@@ -268,104 +240,9 @@ function encodeBase64(str) {
     }
 }
 
-function decodeBase64(str) {
-    try {
-        return decodeURIComponent(escape(atob(str)));
-    } catch (e) {
-        return atob(str);
-    }
-}
-
-function parseIP(ip) {
-    if (typeof ip !== 'string') {
-        ip = String(ip || '');
-    }
-    if (!ip || ip.trim() === '') {
-        return { displayIp: '', port: '443', name: '' };
-    }
-    ip = ip.trim();
-    const match = ip.match(/^(\[[a-fA-F0-9:]+\]|[^:#\[\]]+)(?::(\d+))?(#.*)?$/);
-    if (!match) {
-        return { displayIp: ip, port: '443', name: '' };
-    }
-    return {
-        displayIp: match[1],
-        port: match[2] || '443',
-        name: (match[3] || '').slice(1),
-    };
-}
-
-// ==========================================
-// 核心订阅引擎
-// ==========================================
-function multiplexLink(baseLink, ipRow, index) {
-    if (typeof ipRow === 'string') {
-        ipRow = { ip: ipRow, name: '' };
-    }
-    
-    const ipStr = ipRow.ip || ipRow || '';
-    const { displayIp, port, name } = parseIP(ipStr);
-    
-    if (!displayIp) return null;
-    
-    const nodeNumber = String(index + 1).padStart(3, '0');
-    const nodeName = `☆优选库 | 公益 | 免费 | ${nodeNumber}☆`;
-
-    try {
-        if (baseLink.startsWith('vless://') || baseLink.startsWith('trojan://')) {
-            const url = new URL(baseLink);
-            const originalHost = url.hostname;
-            url.hostname = displayIp;
-            if (port && port !== 'N/A' && port !== '443') {
-                url.port = port;
-            }
-            url.hash = nodeName;
-            if (!url.searchParams.has('host') && originalHost) {
-                url.searchParams.set('host', originalHost);
-            }
-            if (!url.searchParams.has('sni') && originalHost) {
-                url.searchParams.set('sni', originalHost);
-            }
-            return url.toString();
-        } 
-        else if (baseLink.startsWith('vmess://')) {
-            const b64 = baseLink.slice(8).replace(/-/g, '+').replace(/_/g, '/');
-            const config = JSON.parse(decodeBase64(b64));
-            if (!config.sni) config.sni = config.add;
-            if (!config.host) config.host = config.add;
-            config.add = displayIp;
-            if (port && port !== 'N/A' && port !== '443') {
-                config.port = parseInt(port);
-            }
-            config.ps = nodeName;
-            return 'vmess://' + encodeBase64(JSON.stringify(config));
-        }
-    } catch (e) {
-        console.warn('生成节点失败:', e.message);
-        return null;
-    }
-    return null;
-}
-
 // ==========================================
 // UI控制
 // ==========================================
-function toggleMode() {
-    const mode = document.getElementById('outputMode').value;
-    const baseGroup = document.getElementById('baseNodeGroup');
-    if (mode === 'ip') {
-        baseGroup.style.display = 'none';
-    } else {
-        baseGroup.style.display = 'block';
-    }
-}
-
-function toggleCustomBase() {
-    const select = document.getElementById('baseLinkSelect');
-    const customGroup = document.getElementById('customBaseGroup');
-    customGroup.style.display = parseInt(select.value) === 3 ? 'block' : 'none';
-}
-
 function toggleCustomUrl() {
     const select = document.getElementById('extUrlSelect');
     const customGroup = document.getElementById('customUrlGroup');
@@ -393,14 +270,14 @@ function downloadSub() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'subscribe.txt';
+        a.download = 'ip_list.txt';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         showStatus('✅ 文件下载成功！', 'success');
     } else {
-        showStatus('⚠️ 请先生成订阅链接', 'error');
+        showStatus('⚠️ 请先获取IP列表', 'error');
     }
 }
 
@@ -420,19 +297,9 @@ function hideStatus() {
 // 生成订阅主函数
 // ==========================================
 async function generateSub() {
-    const mode = document.getElementById('outputMode').value;
-    const baseLinkId = parseInt(document.getElementById('baseLinkSelect').value);
-    const customBaseLink = document.getElementById('customBaseLink').value.trim();
     const sourceId = parseInt(document.getElementById('extUrlSelect').value);
     const customUrl = document.getElementById('customUrl').value.trim();
 
-    // 验证
-    if (mode === 'node') {
-        if (baseLinkId === 3 && !customBaseLink) {
-            showStatus('❌ 请填写自定义节点链接！', 'error');
-            return;
-        }
-    }
     if (sourceId === 9 && !customUrl) {
         showStatus('❌ 请填写自定义链接！', 'error');
         return;
@@ -445,30 +312,11 @@ async function generateSub() {
     subResult.value = '';
     hideStatus();
 
-    btn.innerText = '⏳ 生成中...';
+    btn.innerText = '⏳ 获取中...';
     btn.disabled = true;
     loadingMsg.classList.remove('hidden');
 
     try {
-        // 获取基础节点（如果需要）
-        let baseLink = null;
-        if (mode === 'node') {
-            if (baseLinkId === 3) {
-                baseLink = customBaseLink;
-            } else {
-                baseLink = PRESET_BASE_LINKS[baseLinkId];
-                if (!baseLink) {
-                    showStatus('❌ 无效的基础节点', 'error');
-                    return;
-                }
-            }
-
-            if (!baseLink.startsWith('vless://') && !baseLink.startsWith('vmess://') && !baseLink.startsWith('trojan://')) {
-                showStatus('❌ 基础节点格式无效，请检查链接', 'error');
-                return;
-            }
-        }
-
         // 获取优选IP源
         let extUrl;
         if (sourceId === 9) {
@@ -521,44 +369,20 @@ async function generateSub() {
             return;
         }
 
-        let finalOutput = '';
-
-        if (mode === 'ip') {
-            // 纯IP列表模式 - 直接输出IP
-            finalOutput = ipList.join('\n');
-            showStatus(`✅ 获取到 ${ipList.length} 个IP地址`, 'success');
-        } else {
-            // 节点生成模式
-            showStatus(`✅ 成功获取 ${ipList.length} 个IP，正在生成节点...`, 'success');
-
-            const MAX_NODES = 500;
-            const processCount = Math.min(ipList.length, MAX_NODES);
-            const generatedLinks = [];
-
-            for (let i = 0; i < processCount; i++) {
-                const ipStr = ipList[i];
-                const link = multiplexLink(baseLink, ipStr, i);
-                if (link) generatedLinks.push(link);
-            }
-
-            if (generatedLinks.length === 0) {
-                showStatus('❌ 没有生成任何可用节点，请检查基础节点格式', 'error');
-                return;
-            }
-
-            finalOutput = generatedLinks.join('\n');
-            showStatus(`✅ 生成成功！共 ${generatedLinks.length} 个节点`, 'success');
-        }
-
+        // 直接输出IP列表
+        const finalOutput = ipList.join('\n');
+        
         // Base64编码输出
         const encoded = encodeBase64(finalOutput);
         subResult.value = encoded;
 
+        showStatus(`✅ 获取成功！共 ${ipList.length} 个IP地址`, 'success');
+
     } catch (e) {
-        console.error('生成失败:', e);
-        showStatus(`❌ 生成失败: ${e.message}`, 'error');
+        console.error('获取失败:', e);
+        showStatus(`❌ 获取失败: ${e.message}`, 'error');
     } finally {
-        btn.innerText = '🚀 生成优选订阅';
+        btn.innerText = '🚀 获取优选IP';
         btn.disabled = false;
         loadingMsg.classList.add('hidden');
     }
@@ -568,13 +392,9 @@ async function generateSub() {
 // 初始化
 // ==========================================
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('baseLinkSelect').value = '0';
     document.getElementById('extUrlSelect').value = '2';
-    document.getElementById('outputMode').value = 'node';
-    toggleMode();
-    toggleCustomBase();
     toggleCustomUrl();
-    showStatus('💡 选择输出模式、基础节点和IP来源，点击生成', 'info');
+    showStatus('💡 选择IP来源，点击获取优选IP列表', 'info');
 });
 </script>
 </body>
