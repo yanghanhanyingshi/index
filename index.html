@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>优选库 - 订阅生成</title>
+<title>优选库</title>
 <link rel="icon" sizes="56x56" href="https://pan.ling-lu-02.ccwu.cc/raw/------/2.jpg">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -129,7 +129,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     color: #64748b; 
     line-height: 1.8; 
 }
-#customUrlGroup { display: none; margin-top: 8px; }
+#customBaseGroup, #customUrlGroup { display: none; margin-top: 8px; }
 .loading-text { color: #94a3b8; font-size: 13px; text-align: center; margin-top: 8px; }
 .hidden { display: none; }
 .status-box {
@@ -179,13 +179,16 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     <h1>优选订阅</h1>
     
     <div class="form-group">
-        <label>🔗 基础节点模板</label>
-        <select id="baseLinkSelect">
-            <option value="0">🌐 基础节点 ① (推荐)</option>
+        <label>基础节点</label>
+        <select id="baseLinkSelect" onchange="toggleCustomBase()">
+            <option value="0">🌐 基础节点 ①</option>
             <option value="1">🔄 基础节点 ②</option>
             <option value="2">🔄 基础节点 ③</option>
+            <option value="3">✍️ 自定义节点</option>
         </select>
-        <div style="margin-top:6px;font-size:12px;color:#64748b;">💡 选择模板，IP将自动替换到节点中</div>
+        <div id="customBaseGroup">
+            <input type="text" id="customBaseLink" placeholder="请输入有效 VMess / VLESS / Trojan 链接" autocomplete="off">
+        </div>
     </div>
 
     <div class="form-group">
@@ -338,6 +341,12 @@ function multiplexLink(baseLink, ipRow, index) {
 // ==========================================
 // UI控制
 // ==========================================
+function toggleCustomBase() {
+    const select = document.getElementById('baseLinkSelect');
+    const customGroup = document.getElementById('customBaseGroup');
+    customGroup.style.display = parseInt(select.value) === 3 ? 'block' : 'none';
+}
+
 function toggleCustomUrl() {
     const select = document.getElementById('extUrlSelect');
     const customGroup = document.getElementById('customUrlGroup');
@@ -393,9 +402,14 @@ function hideStatus() {
 // ==========================================
 async function generateSub() {
     const baseLinkId = parseInt(document.getElementById('baseLinkSelect').value);
+    const customBaseLink = document.getElementById('customBaseLink').value.trim();
     const sourceId = parseInt(document.getElementById('extUrlSelect').value);
     const customUrl = document.getElementById('customUrl').value.trim();
 
+    if (baseLinkId === 3 && !customBaseLink) {
+        showStatus('❌ 请填写自定义节点链接！', 'error');
+        return;
+    }
     if (sourceId === 9 && !customUrl) {
         showStatus('❌ 请填写自定义链接！', 'error');
         return;
@@ -413,14 +427,22 @@ async function generateSub() {
     loadingMsg.classList.remove('hidden');
 
     try {
-        // 获取基础节点
-        const baseLink = PRESET_BASE_LINKS[baseLinkId];
-        if (!baseLink) {
-            showStatus('❌ 无效的基础节点', 'error');
+        let baseLink;
+        if (baseLinkId === 3) {
+            baseLink = customBaseLink;
+        } else {
+            baseLink = PRESET_BASE_LINKS[baseLinkId];
+            if (!baseLink) {
+                showStatus('❌ 无效的基础节点', 'error');
+                return;
+            }
+        }
+
+        if (!baseLink.startsWith('vless://') && !baseLink.startsWith('vmess://') && !baseLink.startsWith('trojan://')) {
+            showStatus('❌ 基础节点格式无效，请检查链接', 'error');
             return;
         }
 
-        // 获取优选IP源
         let extUrl;
         if (sourceId === 9) {
             extUrl = customUrl;
@@ -490,9 +512,8 @@ async function generateSub() {
         }
 
         const finalOutput = generatedLinks.join('\n');
-        
-        // Base64编码 - 标准订阅格式
         const encoded = encodeBase64(finalOutput);
+        
         subResult.value = encoded;
 
         showStatus(`✅ 生成成功！共 ${generatedLinks.length} 个节点`, 'success');
@@ -513,8 +534,9 @@ async function generateSub() {
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('baseLinkSelect').value = '0';
     document.getElementById('extUrlSelect').value = '2';
+    toggleCustomBase();
     toggleCustomUrl();
-    showStatus('💡 选择基础节点和IP来源，点击生成订阅', 'info');
+    showStatus('💡 选择基础节点和IP来源，点击生成', 'info');
 });
 </script>
 </body>
