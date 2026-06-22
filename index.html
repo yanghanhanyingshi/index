@@ -129,7 +129,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     color: #64748b; 
     line-height: 1.8; 
 }
-#customBaseGroup, #customUrlGroup { display: none; margin-top: 8px; }
+#customUrlGroup { display: none; margin-top: 8px; }
 .loading-text { color: #94a3b8; font-size: 13px; text-align: center; margin-top: 8px; }
 .hidden { display: none; }
 .status-box {
@@ -179,16 +179,25 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     <h1>优选订阅</h1>
     
     <div class="form-group">
-        <label>基础节点</label>
+        <label>📦 输出模式</label>
+        <select id="outputMode" onchange="toggleMode()">
+            <option value="ip">🌐 纯IP列表</option>
+            <option value="node" selected>🔗 生成VLESS节点</option>
+        </select>
+    </div>
+
+    <div class="form-group" id="baseNodeGroup">
+        <label>基础节点模板</label>
         <select id="baseLinkSelect" onchange="toggleCustomBase()">
             <option value="0">🌐 基础节点 ①</option>
-            <option value="1">🌐 基础节点 ②</option>
-            <option value="2">🌐 基础节点 ③</option>
+            <option value="1">🔄 基础节点 ②</option>
+            <option value="2">🔄 基础节点 ③</option>
             <option value="3">✍️ 自定义节点</option>
         </select>
         <div id="customBaseGroup">
-            <input type="text" id="customBaseLink" placeholder="请输入有效 VMess / VLESS / Trojan 链接" autocomplete="off">
+            <input type="text" id="customBaseLink" placeholder="请输入有效 VLESS 链接" autocomplete="off">
         </div>
+        <div style="margin-top:6px;font-size:12px;color:#64748b;">💡 选择基础节点作为模板，IP将替换到节点中</div>
     </div>
 
     <div class="form-group">
@@ -224,7 +233,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
         </div>
     </div>
 
-    <div class="footer">优选库 &copy; 2026</div>
+    <div class="footer">优选库 &copy; 2026 | 纯前端生成</div>
 </div>
 <script>
 // ==========================================
@@ -341,6 +350,16 @@ function multiplexLink(baseLink, ipRow, index) {
 // ==========================================
 // UI控制
 // ==========================================
+function toggleMode() {
+    const mode = document.getElementById('outputMode').value;
+    const baseGroup = document.getElementById('baseNodeGroup');
+    if (mode === 'ip') {
+        baseGroup.style.display = 'none';
+    } else {
+        baseGroup.style.display = 'block';
+    }
+}
+
 function toggleCustomBase() {
     const select = document.getElementById('baseLinkSelect');
     const customGroup = document.getElementById('customBaseGroup');
@@ -401,14 +420,18 @@ function hideStatus() {
 // 生成订阅主函数
 // ==========================================
 async function generateSub() {
+    const mode = document.getElementById('outputMode').value;
     const baseLinkId = parseInt(document.getElementById('baseLinkSelect').value);
     const customBaseLink = document.getElementById('customBaseLink').value.trim();
     const sourceId = parseInt(document.getElementById('extUrlSelect').value);
     const customUrl = document.getElementById('customUrl').value.trim();
 
-    if (baseLinkId === 3 && !customBaseLink) {
-        showStatus('❌ 请填写自定义节点链接！', 'error');
-        return;
+    // 验证
+    if (mode === 'node') {
+        if (baseLinkId === 3 && !customBaseLink) {
+            showStatus('❌ 请填写自定义节点链接！', 'error');
+            return;
+        }
     }
     if (sourceId === 9 && !customUrl) {
         showStatus('❌ 请填写自定义链接！', 'error');
@@ -427,22 +450,26 @@ async function generateSub() {
     loadingMsg.classList.remove('hidden');
 
     try {
-        let baseLink;
-        if (baseLinkId === 3) {
-            baseLink = customBaseLink;
-        } else {
-            baseLink = PRESET_BASE_LINKS[baseLinkId];
-            if (!baseLink) {
-                showStatus('❌ 无效的基础节点', 'error');
+        // 获取基础节点（如果需要）
+        let baseLink = null;
+        if (mode === 'node') {
+            if (baseLinkId === 3) {
+                baseLink = customBaseLink;
+            } else {
+                baseLink = PRESET_BASE_LINKS[baseLinkId];
+                if (!baseLink) {
+                    showStatus('❌ 无效的基础节点', 'error');
+                    return;
+                }
+            }
+
+            if (!baseLink.startsWith('vless://') && !baseLink.startsWith('vmess://') && !baseLink.startsWith('trojan://')) {
+                showStatus('❌ 基础节点格式无效，请检查链接', 'error');
                 return;
             }
         }
 
-        if (!baseLink.startsWith('vless://') && !baseLink.startsWith('vmess://') && !baseLink.startsWith('trojan://')) {
-            showStatus('❌ 基础节点格式无效，请检查链接', 'error');
-            return;
-        }
-
+        // 获取优选IP源
         let extUrl;
         if (sourceId === 9) {
             extUrl = customUrl;
@@ -494,29 +521,38 @@ async function generateSub() {
             return;
         }
 
-        showStatus(`✅ 成功获取 ${ipList.length} 个IP，正在生成节点...`, 'success');
+        let finalOutput = '';
 
-        const MAX_NODES = 500;
-        const processCount = Math.min(ipList.length, MAX_NODES);
-        const generatedLinks = [];
+        if (mode === 'ip') {
+            // 纯IP列表模式 - 直接输出IP
+            finalOutput = ipList.join('\n');
+            showStatus(`✅ 获取到 ${ipList.length} 个IP地址`, 'success');
+        } else {
+            // 节点生成模式
+            showStatus(`✅ 成功获取 ${ipList.length} 个IP，正在生成节点...`, 'success');
 
-        for (let i = 0; i < processCount; i++) {
-            const ipStr = ipList[i];
-            const link = multiplexLink(baseLink, ipStr, i);
-            if (link) generatedLinks.push(link);
+            const MAX_NODES = 500;
+            const processCount = Math.min(ipList.length, MAX_NODES);
+            const generatedLinks = [];
+
+            for (let i = 0; i < processCount; i++) {
+                const ipStr = ipList[i];
+                const link = multiplexLink(baseLink, ipStr, i);
+                if (link) generatedLinks.push(link);
+            }
+
+            if (generatedLinks.length === 0) {
+                showStatus('❌ 没有生成任何可用节点，请检查基础节点格式', 'error');
+                return;
+            }
+
+            finalOutput = generatedLinks.join('\n');
+            showStatus(`✅ 生成成功！共 ${generatedLinks.length} 个节点`, 'success');
         }
 
-        if (generatedLinks.length === 0) {
-            showStatus('❌ 没有生成任何可用节点，请检查基础节点格式', 'error');
-            return;
-        }
-
-        const finalOutput = generatedLinks.join('\n');
+        // Base64编码输出
         const encoded = encodeBase64(finalOutput);
-        
         subResult.value = encoded;
-
-        showStatus(`✅ 生成成功！共 ${generatedLinks.length} 个节点`, 'success');
 
     } catch (e) {
         console.error('生成失败:', e);
@@ -534,9 +570,11 @@ async function generateSub() {
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('baseLinkSelect').value = '0';
     document.getElementById('extUrlSelect').value = '2';
+    document.getElementById('outputMode').value = 'node';
+    toggleMode();
     toggleCustomBase();
     toggleCustomUrl();
-    showStatus('💡 选择基础节点和IP来源，点击生成', 'info');
+    showStatus('💡 选择输出模式、基础节点和IP来源，点击生成', 'info');
 });
 </script>
 </body>
