@@ -312,31 +312,27 @@ function multiplexLink(baseLink, ipRow, index) {
             }
             url.hash = nodeName;
             
-            // 2. 删除 host 参数（避免客户端显示域名）
+            // 2. 删除 host 参数，确保客户端显示 hostname
             url.searchParams.delete('host');
             
-            // 3. 将 sni 设置为优选 IP（这样客户端“服务器地址”显示 IP）
-            url.searchParams.set('sni', displayIp);
-            
-            // 4. 开启 insecure 跳过证书验证（因为 IP 证书通常不匹配）
-            //    同时设置 allowInsecure=1 以确保兼容
-            url.searchParams.set('insecure', '1');
-            url.searchParams.set('allowInsecure', '1');
+            // 3. 保留 sni 不变（如果原本没有，则设为原始域名）
+            if (!url.searchParams.has('sni') && originalHost) {
+                url.searchParams.set('sni', originalHost);
+            }
+            // 不修改 insecure，保留原有值
             
             return url.toString();
         } 
         else if (baseLink.startsWith('vmess://')) {
             const b64 = baseLink.slice(8).replace(/-/g, '+').replace(/_/g, '/');
             const config = JSON.parse(decodeBase64(b64));
-            // VMess 类似处理：将 add 设为 IP，sni 和 host 设为 IP，并开启 insecure
+            // VMess：设置 add 为 IP，保留 sni 和 host 不变（但删除 host 可能更好，但 VMess 用 host 做伪装）
+            // 为保险，保持原有 host 和 sni 不变，只改 add
             config.add = displayIp;
             if (port && port !== 'N/A' && port !== '443') {
                 config.port = parseInt(port);
             }
-            config.sni = displayIp;
-            config.host = displayIp; // 设置 host 为 IP，也可删除 host 但 VMess 中 host 常用于伪装，此处设为 IP
-            config.insecure = 1;
-            config.allowInsecure = 1;
+            // 不改 sni 和 host，保留原值
             config.ps = nodeName;
             return 'vmess://' + encodeBase64(JSON.stringify(config));
         }
