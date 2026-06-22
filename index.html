@@ -1,812 +1,466 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <meta name="theme-color" content="#1a1a2e">
-    <title>个人介绍 | 单页面 · 创造者</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>优选库</title>
+<link rel="icon" sizes="56x56" href="https://pan.ling-lu-02.ccwu.cc/raw/------/2.jpg">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+    background: #0a0a1a; 
+    min-height: 100vh; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+    padding: 16px; 
+}
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, #0a0a1a 70%);
+    z-index: -1;
+}
+.card { 
+    background: rgba(255,255,255,0.05); 
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px); 
+    padding: 24px 20px; 
+    border-radius: 24px; 
+    width: 100%; 
+    max-width: 440px; 
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6); 
+    border: 1px solid rgba(255,255,255,0.08); 
+}
+.avatar { 
+    width: 64px; 
+    height: 64px; 
+    border-radius: 50%; 
+    margin: 0 auto 16px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    overflow: hidden; 
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+h1 { 
+    font-size: 22px; 
+    text-align: center; 
+    margin-bottom: 28px; 
+    font-weight: 600; 
+    letter-spacing: 0.5px; 
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.form-group { margin-bottom: 16px; }
+label { 
+    display: block; 
+    font-size: 13px; 
+    margin-bottom: 6px; 
+    color: #94a3b8; 
+    font-weight: 500; 
+}
+input, select { 
+    width: 100%; 
+    padding: 14px 16px; 
+    background: rgba(0,0,0,0.4); 
+    border: 1px solid rgba(255,255,255,0.08); 
+    border-radius: 12px; 
+    color: #f1f5f9; 
+    font-size: 15px; 
+    transition: all 0.3s ease; 
+    -webkit-appearance: none;
+    appearance: none;
+}
+input:focus, select:focus { 
+    outline: none; 
+    border-color: #3b82f6; 
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); 
+    background: rgba(0,0,0,0.6); 
+}
+input::placeholder { color: #64748b; }
+select { 
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+}
+select option { color: #000; background: #1e293b; }
+button { 
+    width: 100%; 
+    padding: 14px; 
+    background: linear-gradient(135deg, #3b82f6, #6366f1); 
+    color: #fff; 
+    border: none; 
+    border-radius: 12px; 
+    font-size: 16px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    transition: all 0.3s; 
+    margin-top: 4px;
+}
+button:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3); }
+button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+#subResult { 
+    background: rgba(0,0,0,0.5); 
+    color: #60a5fa; 
+    font-size: 14px; 
+    cursor: pointer; 
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    word-break: break-all;
+}
+.footer { 
+    margin-top: 24px; 
+    text-align: center; 
+    font-size: 12px; 
+    color: #64748b; 
+    line-height: 1.8; 
+}
+#qrWrap { display: none; justify-content: center; margin-top: 20px; }
+#qrCodeBox { background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+#qrCodeBox img { display: block; }
+#customBaseGroup, #customUrlGroup { display: none; margin-top: 8px; }
+.loading-text { color: #94a3b8; font-size: 13px; text-align: center; margin-top: 8px; }
+.hidden { display: none; }
 
-        body {
-            font-family: 'Inter', 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(145deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
-            background-attachment: fixed;
-            min-height: 100vh;
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* 动态流光粒子背景 */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(120, 80, 200, 0.25) 0%, rgba(0, 0, 0, 0) 60%),
-                        radial-gradient(circle at 80% 80%, rgba(255, 100, 150, 0.2) 0%, rgba(0, 0, 0, 0) 55%);
-            pointer-events: none;
-            z-index: 0;
-            animation: breatheGlow 12s infinite alternate;
-        }
-
-        @keyframes breatheGlow {
-            0% {
-                opacity: 0.5;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1.08);
-            }
-        }
-
-        /* 主卡片 - 毛玻璃效果 */
-        .glass-card {
-            max-width: 560px;
-            width: 100%;
-            margin: 0 auto;
-            background: rgba(22, 20, 40, 0.65);
-            backdrop-filter: blur(12px);
-            border-radius: 3rem;
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.08);
-            padding: 2rem 1.8rem;
-            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            position: relative;
-            z-index: 2;
-            animation: cardFloatIn 0.8s ease-out;
-        }
-
-        @keyframes cardFloatIn {
-            0% {
-                opacity: 0;
-                transform: translateY(35px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 30px 55px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.15);
-        }
-
-        /* 头像区域 - 增加点击指针 */
-        .avatar-wrapper {
-            text-align: center;
-            margin-bottom: 1rem;
-            cursor: pointer;
-        }
-
-        .avatar {
-            width: 130px;
-            height: 130px;
-            margin: 0 auto;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
-            padding: 3px;
-            display: inline-block;
-            animation: avatarGlow 3s infinite alternate;
-            transition: transform 0.2s ease;
-            /* 移除任何可能导致阴影的过渡 */
-        }
-        
-        /* 点击时仅缩放，无阴影 */
-        .avatar:active {
-            transform: scale(0.96);
-            /* 确保没有阴影产生 */
-            box-shadow: none;
-        }
-
-        @keyframes avatarGlow {
-            0% {
-                box-shadow: 0 0 0 0 rgba(161, 140, 209, 0.4);
-            }
-            100% {
-                box-shadow: 0 0 0 8px rgba(251, 194, 235, 0.2);
-            }
-        }
-
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-            transition: transform 0.4s ease;
-            background-color: #2a2747;
-            pointer-events: none; /* 让点击穿透到父容器 */
-        }
-
-        .avatar:hover img {
-            transform: scale(1.02);
-        }
-
-        /* 姓名与状态 */
-        .name {
-            text-align: center;
-            margin-top: 0.6rem;
-        }
-
-        .name h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(120deg, #ffffff, #e0c3ff);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            letter-spacing: -0.3px;
-            margin-bottom: 0.2rem;
-        }
-
-        .age-gender {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(4px);
-            padding: 0.25rem 1rem;
-            border-radius: 60px;
-            font-size: 0.8rem;
-            color: #ddd6fe;
-            font-weight: 500;
-            margin: 0.3rem 0;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(4px);
-            padding: 0.3rem 1rem;
-            border-radius: 60px;
-            font-size: 0.8rem;
-            color: #ddd6fe;
-            font-weight: 500;
-            margin-top: 6px;
-        }
-
-        .badge i {
-            font-size: 0.7rem;
-            color: #6ee7b7;
-        }
-
-        /* 名言滚动区域 */
-        .motto-container {
-            width: 100%;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(8px);
-            border-radius: 60px;
-            padding: 0.6rem 0;
-            margin: 1rem 0 1.2rem 0;
-            border: 0.5px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .motto-scroll {
-            display: inline-block;
-            white-space: nowrap;
-            animation: scrollMotto 12s linear infinite;
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: 2px;
-            color: #fce7f3;
-            text-shadow: 0 0 6px rgba(236, 72, 153, 0.4);
-            padding-left: 20px;
-        }
-        .motto-scroll i {
-            margin: 0 12px;
-            color: #f9a8d4;
-            font-size: 1rem;
-        }
-        @keyframes scrollMotto {
-            0% {
-                transform: translateX(0%);
-            }
-            100% {
-                transform: translateX(-50%);
-            }
-        }
-        .motto-wrapper {
-            display: flex;
-            width: fit-content;
-        }
-
-        /* 通用区块样式 */
-        .about-section {
-            margin: 1.2rem 0 1rem;
-        }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #f0eaff;
-            margin-bottom: 0.8rem;
-            letter-spacing: -0.2px;
-        }
-
-        .section-title i {
-            color: #c084fc;
-            font-size: 1.2rem;
-        }
-
-        .about-text {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.9rem 1rem;
-            border-radius: 1.5rem;
-            font-size: 0.92rem;
-            line-height: 1.55;
-            color: #e2ddfa;
-            border: 0.5px solid rgba(255, 255, 255, 0.08);
-        }
-
-        /* 统一标签卡片样式 */
-        .unified-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 0.5rem;
-        }
-
-        /* 与成绩奖项完全一致的卡片样式 */
-        .award-style {
-            background: rgba(236, 72, 153, 0.15);
-            backdrop-filter: blur(4px);
-            padding: 0.45rem 1.2rem;
-            border-radius: 40px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #ffe0f0;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: 0.5px solid rgba(255, 128, 192, 0.3);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .award-style i {
-            font-size: 0.9rem;
-            color: #ffb3d9;
-        }
-        .award-style:hover {
-            background: rgba(236, 72, 153, 0.4);
-            transform: translateY(-2px);
-            border-color: rgba(255, 200, 220, 0.8);
-            box-shadow: 0 4px 10px rgba(236, 72, 153, 0.2);
-        }
-
-        /* 兴趣爱好标签 */
-        .hobby-tag {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(4px);
-            padding: 0.45rem 1.2rem;
-            border-radius: 40px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #e9e2ff;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: 0.5px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .hobby-tag i {
-            font-size: 0.85rem;
-            color: #f6a7c1;
-        }
-        .hobby-tag:hover {
-            background: rgba(244, 114, 182, 0.5);
-            transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-
-        /* 技能标签 */
-        .skill-tag {
-            background: rgba(52, 211, 153, 0.2);
-            backdrop-filter: blur(4px);
-            padding: 0.45rem 1.2rem;
-            border-radius: 40px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #d1fae5;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: 0.5px solid rgba(52, 211, 153, 0.4);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .skill-tag i {
-            font-size: 0.85rem;
-            color: #6ee7b7;
-        }
-        .skill-tag:hover {
-            background: rgba(52, 211, 153, 0.4);
-            transform: translateY(-2px);
-            border-color: rgba(52, 211, 153, 0.8);
-            box-shadow: 0 4px 10px rgba(52, 211, 153, 0.2);
-        }
-
-        /* 联系方式区域 */
-        .contact-icons {
-            display: flex;
-            justify-content: center;
-            gap: 1.6rem;
-            margin: 1.2rem 0 0.8rem;
-            flex-wrap: wrap;
-        }
-        .contact-icon-btn {
-            background: rgba(20, 18, 38, 0.7);
-            backdrop-filter: blur(8px);
-            width: 56px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-size: 1.7rem;
-            color: #e0defa;
-            transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-        .contact-icon-btn i {
-            transition: transform 0.2s;
-        }
-        .contact-icon-btn:hover {
-            background: #8b5cf6;
-            color: white;
-            transform: translateY(-4px) scale(1.05);
-            border-color: #c4b5fd;
-            box-shadow: 0 12px 20px rgba(139, 92, 246, 0.4);
-        }
-        .contact-icon-btn:active {
-            transform: scale(0.96);
-        }
-        .contact-note {
-            text-align: center;
-            font-size: 0.7rem;
-            color: #a9a6d4;
-            margin-top: 0.6rem;
-            letter-spacing: 0.3px;
-        }
-
-        .footer-note {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.7rem;
-            color: #8b89aa;
-            border-top: 0.5px solid rgba(255, 255, 255, 0.1);
-            padding-top: 1rem;
-        }
-
-        /* 移动端紧凑 */
-        @media (max-width: 480px) {
-            body {
-                padding: 1rem;
-            }
-            .glass-card {
-                padding: 1.5rem 1.2rem;
-                border-radius: 2rem;
-            }
-            .avatar {
-                width: 110px;
-                height: 110px;
-            }
-            .name h1 {
-                font-size: 1.7rem;
-            }
-            .contact-icon-btn {
-                width: 48px;
-                height: 48px;
-                font-size: 1.4rem;
-            }
-            .contact-icons {
-                gap: 1.2rem;
-            }
-            .award-style, .hobby-tag, .skill-tag {
-                font-size: 0.75rem;
-                padding: 0.4rem 1rem;
-            }
-            .motto-scroll {
-                font-size: 0.9rem;
-                letter-spacing: 1px;
-            }
-        }
-
-        .toast-message {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(16px);
-            color: white;
-            padding: 10px 24px;
-            border-radius: 60px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            z-index: 1000;
-            transition: transform 0.3s ease, opacity 0.2s;
-            opacity: 0;
-            pointer-events: none;
-            white-space: nowrap;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            font-family: monospace;
-        }
-        .toast-message.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .wave-bg {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            opacity: 0.12;
-            pointer-events: none;
-            z-index: 1;
-        }
-        
-        /* 头像点击浮动提示特效（短暂出现后消失） */
-        .floating-buff {
-            position: fixed;
-            pointer-events: none;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #fbbf24;
-            text-shadow: 0 0 6px #ff8c00;
-            z-index: 2000;
-            animation: floatUpFade 0.8s ease-out forwards;
-            font-family: monospace;
-        }
-        @keyframes floatUpFade {
-            0% {
-                opacity: 1;
-                transform: translateY(0px) scale(0.8);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-40px) scale(1.2);
-            }
-        }
-    </style>
+@media (max-width: 480px) {
+    body { padding: 12px; }
+    .card { padding: 20px 16px; border-radius: 20px; }
+    h1 { font-size: 20px; margin-bottom: 24px; }
+    input, select { padding: 12px 14px; font-size: 16px; }
+    button { padding: 14px; font-size: 15px; }
+    .avatar { width: 56px; height: 56px; }
+}
+@supports (padding: max(0px)) {
+    body { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+}
+</style>
 </head>
 <body>
-
-    <div class="wave-bg">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
-            <path fill="#b38eff" fill-opacity="0.5" d="M0,224L48,213.3C96,203,192,181,288,186.7C384,192,480,224,576,229.3C672,235,768,213,864,192C960,171,1056,149,1152,154.7C1248,160,1344,192,1392,208L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-        </svg>
-    </div>
-
-    <div class="glass-card">
-        <!-- 头像区域 - 增加点击事件 -->
-        <div class="avatar-wrapper" id="avatarClickArea">
-            <div class="avatar">
-                <img src="https://d.kstore.dev/download/7547/mmexport1739683210055.jpg" alt="" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%232d2a5e\'/%3E%3C/svg%3E';">
-            </div>
-        </div>
-
-        <div class="name">
-            <h1>单页面</h1>
-            <div class="age-gender">
-                <i class="fas fa-mars"></i> 18岁 · 男
-            </div>
-            <div class="badge">
-                <i class="fas fa-circle" style="font-size: 0.55rem;"></i> 
-                <span>保持好奇 · 持续创造</span>
-            </div>
-        </div>
-
-        <!-- 滚动名言 -->
-        <div class="motto-container">
-            <div class="motto-wrapper">
-                <div class="motto-scroll">
-                    🌟 三餐暖 · 四季安 🌟 &nbsp;&nbsp;&nbsp; ✨ 日子顺 · 心不慌 ✨ &nbsp;&nbsp;&nbsp; 🍚 吃饱饭 · 常安康 🍚 &nbsp;&nbsp;&nbsp; 🌈 岁岁平 · 岁岁安 🌈 &nbsp;&nbsp;&nbsp;
-                </div>
-                <div class="motto-scroll">
-                    🌟 三餐暖 · 四季安 🌟 &nbsp;&nbsp;&nbsp; ✨ 日子顺 · 心不慌 ✨ &nbsp;&nbsp;&nbsp; 🍚 吃饱饭 · 常安康 🍚 &nbsp;&nbsp;&nbsp; 🌈 岁岁平 · 岁岁安 🌈 &nbsp;&nbsp;&nbsp;
-                </div>
-            </div>
-        </div>
-
-        <!-- 关于我 -->
-        <div class="about-section">
-            <div class="section-title">
-                <i class="fas fa-user-astronaut"></i>
-                <span>关于我</span>
-            </div>
-            <div class="about-text">
-                性格开朗，善于学习和探索新事物，拥有良好的沟通能力和团队协作意识。对生活充满热情，对工作保持严谨，始终以积极的心态面对挑战，不断提升自我。
-            </div>
-        </div>
-
-        <!-- 我的优势 -->
-        <div class="about-section">
-            <div class="section-title">
-                <i class="fas fa-bolt"></i>
-                <span>我的优势</span>
-            </div>
-            <div class="unified-grid">
-                <div class="award-style" data-advantage="快速学习"><i class="fas fa-rocket"></i> 快速学习</div>
-                <div class="award-style" data-advantage="团队协作"><i class="fas fa-users"></i> 团队协作</div>
-                <div class="award-style" data-advantage="沟通表达"><i class="fas fa-comments"></i> 沟通表达</div>
-                <div class="award-style" data-advantage="问题解决"><i class="fas fa-search"></i> 问题解决</div>
-                <div class="award-style" data-advantage="细节把控"><i class="fas fa-magic"></i> 细节把控</div>
-                <div class="award-style" data-advantage="持续创造"><i class="fas fa-lightbulb"></i> 持续创造</div>
-            </div>
-        </div>
-
-        <!-- 兴趣爱好板块 -->
-        <div class="about-section">
-            <div class="section-title">
-                <i class="fas fa-heart"></i>
-                <span>兴趣爱好</span>
-            </div>
-            <div class="unified-grid">
-                <div class="hobby-tag" data-hobby="美食"><i class="fas fa-utensils"></i> 美食</div>
-                <div class="hobby-tag" data-hobby="旅游"><i class="fas fa-plane"></i> 旅游</div>
-                <div class="hobby-tag" data-hobby="运动"><i class="fas fa-futbol"></i> 运动</div>
-                <div class="hobby-tag" data-hobby="游戏"><i class="fas fa-gamepad"></i> 游戏</div>
-                <div class="hobby-tag" data-hobby="动漫"><i class="fas fa-film"></i> 动漫</div>
-            </div>
-        </div>
-
-        <!-- 成绩奖项板块 -->
-        <div class="about-section">
-            <div class="section-title">
-                <i class="fas fa-trophy"></i>
-                <span>成绩奖项</span>
-            </div>
-            <div class="unified-grid">
-                <div class="award-style" data-award="吃饭第一名"><i class="fas fa-utensil-spoon"></i> 吃饭第一名</div>
-                <div class="award-style" data-award="熬夜第一名"><i class="fas fa-moon"></i> 熬夜第一名</div>
-                <div class="award-style" data-award="睡觉第一名"><i class="fas fa-bed"></i> 睡觉第一名</div>
-                <div class="award-style" data-award="打游戏第一名"><i class="fas fa-gamepad"></i> 打游戏第一名</div>
-                <div class="award-style" data-award="偷懒第一名"><i class="fas fa-couch"></i> 偷懒第一名</div>
-            </div>
-        </div>
-
-        <!-- 技能标签板块 -->
-        <div class="about-section">
-            <div class="section-title">
-                <i class="fas fa-code-branch"></i>
-                <span>技能专长</span>
-            </div>
-            <div class="unified-grid">
-                <div class="skill-tag" data-skill="玩手机"><i class="fas fa-mobile-alt"></i> 玩手机</div>
-                <div class="skill-tag" data-skill="玩电脑"><i class="fas fa-laptop-code"></i> 玩电脑</div>
-                <div class="skill-tag" data-skill="玩游戏"><i class="fas fa-gamepad"></i> 玩游戏</div>
-                <div class="skill-tag" data-skill="制作美食"><i class="fas fa-egg"></i> 制作美食</div>
-            </div>
-        </div>
-
-        <!-- 联系方式 -->
-        <div class="contact-icons">
-            <div class="contact-icon-btn" data-contact-type="wechat" data-value="666888" data-label="微信号">
-                <i class="fab fa-weixin"></i>
-            </div>
-            <div class="contact-icon-btn" data-contact-type="qq" data-value="369258147" data-label="QQ号">
-                <i class="fab fa-qq"></i>
-            </div>
-            <div class="contact-icon-btn" data-contact-type="phone" data-value="13800138000" data-label="手机号">
-                <i class="fas fa-phone-alt"></i>
-            </div>
-            <div class="contact-icon-btn" data-contact-type="email" data-value="814555752@qq.com" data-label="邮箱">
-                <i class="fas fa-envelope"></i>
-            </div>
-        </div>
-        <div class="contact-note">
-            <i class="fas fa-hand-pointer"></i> 点击图标复制联系方式
-        </div>
-
-        <div class="footer-note">
-            <span>© 2026 单页面</span>
+<div class="card">
+    <div class="avatar"><img src="https://pan.ling-lu-02.ccwu.cc/raw/------/2.jpg" alt="Logo"></div>
+    <h1>优选订阅</h1>
+    
+    <div class="form-group">
+        <label>基础节点</label>
+        <select id="baseLinkSelect" onchange="toggleCustomBase()">
+            <option value="0">🌐 基础节点 ①</option>
+            <option value="1">🔄 基础节点 ②</option>
+            <option value="2">🔄 基础节点 ③</option>
+            <option value="3">✍️ 自定义节点</option>
+        </select>
+        <div id="customBaseGroup">
+            <input type="text" id="customBaseLink" placeholder="请输入有效 VMess / VLESS / Trojan 链接" autocomplete="off">
         </div>
     </div>
 
-    <div id="toastMsg" class="toast-message">✨ 提示</div>
+    <div class="form-group">
+        <label>优选 IP 来源</label>
+        <select id="extUrlSelect" onchange="toggleCustomUrl()">
+            <option value="2">🦌 灵鹿优选 (推荐)</option>
+            <option value="3">🐆 vps789 (推荐)</option>
+            <option value="4">🐈 麒麟优选 (推荐)</option>
+            <option value="5">🐅 红星优选 (推荐)</option>
+            <option value="0">🦍 动态测速 API - 电信优先</option>
+            <option value="1">🦘 动态测速 API - 联通优先</option>
+            <option value="6">🐘 动态测速 API - 移动优先</option>
+            <option value="7">🐖 动态测速 API - 通用官方</option>
+            <option value="8">🐒 静态 TXT 库 - cmliu (备用)</option>
+            <option value="9">✍️ 自定义：手动输入链接...</option>
+        </select>
+        <div id="customUrlGroup">
+            <input type="text" id="customUrl" placeholder="请粘贴你的自定义链接..." autocomplete="off">
+        </div>
+    </div>
 
-    <script>
-        (function() {
-            const toast = document.getElementById('toastMsg');
-            function showMessage(msg) {
-                if(!toast) return;
-                toast.textContent = msg;
-                toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 2200);
-            }
+    <button onclick="generateSub()" id="genBtn">生成优选短链</button>
+    <div id="loadingMsg" class="loading-text hidden">⏳ 正在生成订阅链接，请稍候...</div>
+    
+    <div class="form-group" style="margin-top: 20px;">
+        <label>您的专属订阅</label>
+        <input type="text" id="subResult" placeholder="点击生成后自动出现" readonly onclick="copyLink()">
+    </div>
+    
+    <div id="qrWrap">
+        <div id="qrCodeBox"></div>
+    </div>
 
-            async function copyToClipboard(text, label) {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    showMessage(`✅ 已复制${label}：${text}`);
-                } catch (err) {
-                    const textarea = document.createElement('textarea');
-                    textarea.value = text;
-                    document.body.appendChild(textarea);
-                    textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                    showMessage(`✅ 已复制${label}：${text}`);
-                }
-            }
+    <div class="footer">优选库 &copy; 2026</div>
+</div>
+<script>
+// ==========================================
+// 全局配置（与后端保持一致）
+// ==========================================
+const FIXED_SUB_TOKEN = '9527';
 
-            // 头像点击随机增益特效（已去除阴影）
-            const avatarArea = document.getElementById('avatarClickArea');
-            const buffList = ['💰 财富 +1', '❤️ 健康 +1', '😊 快乐 +1', '✨ 幸运 +1', '🌟 魅力 +1', '🍀 好运 +1', '💪 力量 +1', '🧠 智慧 +1'];
-            
-            function showFloatingText(text, event) {
-                let x, y;
-                if (event && event.clientX) {
-                    x = event.clientX;
-                    y = event.clientY;
-                } else {
-                    const rect = avatarArea.getBoundingClientRect();
-                    x = rect.left + rect.width / 2;
-                    y = rect.top + rect.height / 2;
-                }
-                const div = document.createElement('div');
-                div.innerText = text;
-                div.className = 'floating-buff';
-                div.style.left = `${x - 30}px`;
-                div.style.top = `${y - 20}px`;
-                document.body.appendChild(div);
-                setTimeout(() => {
-                    if (div && div.parentNode) div.parentNode.removeChild(div);
-                }, 800);
-            }
-            
-            if (avatarArea) {
-                avatarArea.addEventListener('click', (e) => {
-                    const randomIndex = Math.floor(Math.random() * buffList.length);
-                    const buffMsg = buffList[randomIndex];
-                    showMessage(`✨ ${buffMsg} ✨`);
-                    showFloatingText(buffMsg, e);
-                    // 仅缩放动画，无阴影（样式已保证无阴影）
-                    const avatarDiv = avatarArea.querySelector('.avatar');
-                    if(avatarDiv) {
-                        avatarDiv.style.transform = 'scale(0.96)';
-                        setTimeout(() => {
-                            avatarDiv.style.transform = '';
-                        }, 150);
-                    }
-                });
-            }
+// 预设基础节点
+const PRESET_BASE_LINKS = {
+    0: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@saas.sin.fan:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#%E7%81%B5%E9%B9%BF%E4%BC%98%E9%80%89%20%7C%20Canada%20%7C%20078',
+    1: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@cf.877774.xyz:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#cf.877774.xyz',
+    2: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@www.visa.cn:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#www.visa.cn'
+};
 
-            // 联系方式复制
-            const contactBtns = document.querySelectorAll('.contact-icon-btn');
-            contactBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const value = btn.getAttribute('data-value');
-                    const label = btn.getAttribute('data-label') || '联系方式';
-                    if(value) copyToClipboard(value, label);
-                    else showMessage('⚠️ 无法获取联系方式');
-                    btn.style.transform = 'scale(0.94)';
-                    setTimeout(() => { btn.style.transform = ''; }, 150);
-                });
+// 外部优选库
+const EXTERNAL_SOURCES = {
+    0: 'https://cf.junzhen.qzz.io/best_ips_bj.txt',
+    1: 'https://cf.junzhen.qzz.io/best_ips.txt',
+    2: 'https://raw.githubusercontent.com/yanghanhanyingshi/cf-linglu/refs/heads/main/linglu-03.txt',
+    3: 'https://raw.githubusercontent.com/yanghanhanyingshi/cf-linglu/refs/heads/main/vps789-100.txt',
+    4: 'https://raw.githubusercontent.com/yanghanhanyingshi/cf-linglu/refs/heads/main/qilin_ip.txt',
+    5: 'https://raw.githubusercontent.com/xiagefei/CFBestIP/refs/heads/main/addressesapi.txt',
+    6: 'https://raw.githubusercontent.com/svip-s/cloudflare_ip/refs/heads/main/best_ips.txt',
+    7: 'https://bestcf.pages.dev/luoli/all.txt',
+    8: 'https://raw.githubusercontent.com/cmliu/WorkerVless2sub/main/addressesapi.txt'
+};
+
+// ==========================================
+// 核心工具函数
+// ==========================================
+const encodeBase64 = (str) => {
+    try {
+        return btoa(unescape(encodeURIComponent(str)));
+    } catch (e) {
+        return btoa(str);
+    }
+};
+
+const decodeBase64 = (str) => {
+    try {
+        return decodeURIComponent(escape(atob(str)));
+    } catch (e) {
+        return atob(str);
+    }
+};
+
+const createErrorNode = (msg) => {
+    return `vless://00000000-0000-0000-0000-000000000000@127.0.0.1:80?encryption=none&security=none&type=tcp#${encodeURIComponent(msg)}`;
+};
+
+const parseIP = (ip) => {
+    if (!ip) return { displayIp: '', port: '443', name: '' };
+    const match = ip.match(/^(\[[a-fA-F0-9:]+\]|[^:#\[\]]+)(?::(\d+))?(#.*)?$/);
+    if (!match) return { displayIp: ip, port: '443', name: '' };
+    return {
+        displayIp: match[1],
+        port: match[2] || '443',
+        name: (match[3] || '').slice(1),
+    };
+};
+
+// ==========================================
+// 核心订阅引擎
+// ==========================================
+const multiplexLink = (baseLink, ipRow, index) => {
+    const { displayIp, port, name } = parseIP(ipRow);
+    const nodeNumber = String(index + 1).padStart(3, '0');
+    const nodeName = `☆优选库 | 公益 | 免费 | ${nodeNumber}☆`;
+
+    try {
+        if (baseLink.startsWith('vless://') || baseLink.startsWith('trojan://')) {
+            const url = new URL(baseLink);
+            const originalHost = url.hostname;
+            url.hostname = displayIp;
+            if (port && port !== 'N/A') url.port = port;
+            url.hash = nodeName;
+            if (!url.searchParams.has('host') && originalHost) url.searchParams.set('host', originalHost);
+            if (!url.searchParams.has('sni') && originalHost) url.searchParams.set('sni', originalHost);
+            return url.toString();
+        } else if (baseLink.startsWith('vmess://')) {
+            const b64 = baseLink.slice(8).replace(/-/g, '+').replace(/_/g, '/');
+            const config = JSON.parse(decodeBase64(b64));
+            if (!config.sni) config.sni = config.add;
+            if (!config.host) config.host = config.add;
+            config.add = displayIp;
+            if (port && port !== 'N/A') config.port = port;
+            config.ps = nodeName;
+            return 'vmess://' + encodeBase64(JSON.stringify(config));
+        }
+    } catch (e) {
+        return null;
+    }
+    return null;
+};
+
+// ==========================================
+// UI控制
+// ==========================================
+function toggleCustomBase() {
+    const select = document.getElementById('baseLinkSelect');
+    const customGroup = document.getElementById('customBaseGroup');
+    customGroup.style.display = parseInt(select.value) === 3 ? 'block' : 'none';
+}
+
+function toggleCustomUrl() {
+    const select = document.getElementById('extUrlSelect');
+    const customGroup = document.getElementById('customUrlGroup');
+    customGroup.style.display = parseInt(select.value) === 9 ? 'block' : 'none';
+}
+
+function copyLink() {
+    const res = document.getElementById('subResult');
+    if (res.value) {
+        res.select();
+        try {
+            navigator.clipboard.writeText(res.value);
+            alert('✅ 订阅链接已复制！');
+        } catch (e) {
+            document.execCommand('copy');
+            alert('✅ 订阅链接已复制！');
+        }
+    }
+}
+
+// ==========================================
+// 生成订阅主函数（纯前端实现）
+// ==========================================
+async function generateSub() {
+    const baseLinkId = parseInt(document.getElementById('baseLinkSelect').value);
+    const customBaseLink = document.getElementById('customBaseLink').value.trim();
+    const sourceId = parseInt(document.getElementById('extUrlSelect').value);
+    const customUrl = document.getElementById('customUrl').value.trim();
+
+    // 验证
+    if (baseLinkId === 3 && !customBaseLink) {
+        alert('请填写自定义节点链接！');
+        return;
+    }
+    if (sourceId === 9 && !customUrl) {
+        alert('请填写自定义链接！');
+        return;
+    }
+
+    const btn = document.getElementById('genBtn');
+    const loadingMsg = document.getElementById('loadingMsg');
+    btn.innerText = '⏳ 生成中...';
+    btn.disabled = true;
+    loadingMsg.classList.remove('hidden');
+
+    try {
+        // 获取基础节点
+        let baseLink;
+        if (baseLinkId === 3) {
+            baseLink = customBaseLink;
+        } else {
+            baseLink = PRESET_BASE_LINKS[baseLinkId];
+            if (!baseLink) {
+                alert('无效的基础节点');
+                return;
+            }
+        }
+
+        // 获取优选IP源
+        let extUrl;
+        if (sourceId === 9) {
+            extUrl = customUrl;
+        } else {
+            extUrl = EXTERNAL_SOURCES[sourceId];
+            if (!extUrl) {
+                alert('无效的IP来源');
+                return;
+            }
+        }
+
+        // 拉取优选IP列表
+        let ipRows = [];
+        try {
+            const response = await fetch(extUrl, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
             });
-
-            // 优势项点击
-            const advantageItems = document.querySelectorAll('.award-style[data-advantage]');
-            advantageItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const text = item.getAttribute('data-advantage');
-                    showMessage(`✨ 优势特质：${text}`);
-                    item.style.transform = 'scale(0.96)';
-                    setTimeout(() => { item.style.transform = ''; }, 150);
-                });
-            });
-
-            // 兴趣爱好点击
-            const hobbyTags = document.querySelectorAll('.hobby-tag');
-            hobbyTags.forEach(tag => {
-                tag.addEventListener('click', () => {
-                    const hobby = tag.getAttribute('data-hobby') || tag.innerText.trim();
-                    showMessage(`❤️ 热爱${hobby} · 享受生活每一刻`);
-                    tag.style.transform = 'scale(0.96)';
-                    setTimeout(() => { tag.style.transform = ''; }, 150);
-                });
-            });
-
-            // 成绩奖项点击
-            const awardItems = document.querySelectorAll('.award-style[data-award]');
-            awardItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const award = item.getAttribute('data-award');
-                    showMessage(`🏆 荣誉奖项：${award} 🎉`);
-                    item.style.transform = 'scale(0.96)';
-                    setTimeout(() => { item.style.transform = ''; }, 150);
-                });
-            });
-
-            // 技能标签点击
-            const skillTags = document.querySelectorAll('.skill-tag');
-            skillTags.forEach(tag => {
-                tag.addEventListener('click', () => {
-                    const skill = tag.getAttribute('data-skill') || tag.innerText.trim();
-                    showMessage(`💡 技能点：${skill} · 解锁新天赋`);
-                    tag.style.transform = 'scale(0.96)';
-                    setTimeout(() => { tag.style.transform = ''; }, 150);
-                });
-            });
-
-            const footerSpan = document.querySelector('.footer-note span');
-            if(footerSpan) {
-                const currentYear = new Date().getFullYear();
-                if(currentYear !== 2026) footerSpan.innerText = `© ${currentYear} 单页面`;
+            if (!response.ok) throw new Error(`HTTP状态码: ${response.status}`);
+            const text = await response.text();
+            if (text.trim().startsWith('<')) {
+                throw new Error('获取到的是网页而非纯文本列表');
             }
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+            ipRows = lines.map(line => {
+                const { displayIp, port, name } = parseIP(line);
+                return {
+                    ip: port === 'N/A' ? displayIp : `${displayIp}:${port}`,
+                    name: name || '优选节点'
+                };
+            }).filter(r => r.ip);
+        } catch (e) {
+            alert(`拉取优选IP失败: ${e.message}`);
+            return;
+        }
 
-            // 桌面光晕效果
-            const card = document.querySelector('.glass-card');
-            if(card && window.innerWidth > 768) {
-                card.addEventListener('mousemove', (e) => {
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const xPercent = (x / rect.width) * 100;
-                    const yPercent = (y / rect.height) * 100;
-                    card.style.setProperty('--x-pos', `${xPercent}%`);
-                    card.style.setProperty('--y-pos', `${yPercent}%`);
-                });
-                if (!document.querySelector('#dynamic-glow-style')) {
-                    const style = document.createElement('style');
-                    style.id = 'dynamic-glow-style';
-                    style.textContent = `
-                        .glass-card {
-                            position: relative;
-                            overflow: hidden;
-                        }
-                        .glass-card::after {
-                            content: '';
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background: radial-gradient(circle at var(--x-pos, 50%) var(--y-pos, 50%), rgba(255,255,240,0.08), transparent 70%);
-                            pointer-events: none;
-                            z-index: 1;
-                            border-radius: inherit;
-                            transition: opacity 0.2s;
-                        }
-                    `;
-                    document.head.appendChild(style);
-                }
-                card.addEventListener('mouseleave', () => {
-                    card.style.setProperty('--x-pos', '50%');
-                    card.style.setProperty('--y-pos', '50%');
-                });
-            }
-        })();
-    </script>
+        if (ipRows.length === 0) {
+            alert('未获取到任何优选IP');
+            return;
+        }
+
+        // 生成节点
+        const generatedLinks = ipRows
+            .map((row, index) => multiplexLink(baseLink, row, index))
+            .filter(Boolean)
+            .join('\n');
+
+        const finalOutput = generatedLinks || createErrorNode('❌ 没有生成任何可用节点');
+
+        // 编码并生成订阅链接（使用blob URL）
+        const encoded = encodeBase64(finalOutput);
+        const blob = new Blob([encoded], { type: 'text/plain;charset=utf-8' });
+        const subUrl = URL.createObjectURL(blob);
+        
+        // 显示结果
+        document.getElementById('subResult').value = subUrl;
+
+        // 生成二维码
+        const qrWrap = document.getElementById('qrWrap');
+        const qrCodeBox = document.getElementById('qrCodeBox');
+        qrCodeBox.innerHTML = '';
+        qrWrap.style.display = 'flex';
+        new QRCode(qrCodeBox, {
+            text: subUrl,
+            width: 160,
+            height: 160,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+
+        // 通知成功
+        const ipCount = ipRows.length;
+        const msg = `
+✅ 订阅生成成功！
+━━━━━━━━━━━━━━━━━
+📦 优选IP数量：${ipCount} 个
+🔗 订阅链接已生成
+💡 点击输入框可复制链接
+        `.trim();
+        alert(msg);
+
+    } catch (e) {
+        alert('生成订阅失败: ' + e.message);
+        console.error(e);
+    } finally {
+        btn.innerText = '生成优选短链';
+        btn.disabled = false;
+        loadingMsg.classList.add('hidden');
+    }
+}
+
+// ==========================================
+// 初始化
+// ==========================================
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('baseLinkSelect').value = '0';
+    document.getElementById('extUrlSelect').value = '2';
+    toggleCustomBase();
+    toggleCustomUrl();
+});
+</script>
 </body>
 </html>
