@@ -160,6 +160,12 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     border: 1px solid rgba(96, 165, 250, 0.3);
     color: #60a5fa;
 }
+.node-count {
+    color: #94a3b8;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 8px;
+}
 
 @media (max-width: 480px) {
     body { padding: 12px; }
@@ -168,9 +174,6 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     input, select { padding: 12px 14px; font-size: 16px; }
     button { padding: 14px; font-size: 15px; }
     .avatar { width: 56px; height: 56px; }
-}
-@supports (padding: max(0px)) {
-    body { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
 }
 </style>
 </head>
@@ -230,14 +233,12 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
 // ==========================================
 // 全局配置
 // ==========================================
-// 预设基础节点
 const PRESET_BASE_LINKS = {
     0: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@saas.sin.fan:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#%E7%81%B5%E9%B9%BF%E4%BC%98%E9%80%89%20%7C%20Canada%20%7C%20078',
     1: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@cf.877774.xyz:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#cf.877774.xyz',
     2: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@www.visa.cn:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#www.visa.cn'
 };
 
-// 外部优选库
 const EXTERNAL_SOURCES = {
     0: 'https://cf.junzhen.qzz.io/best_ips_bj.txt',
     1: 'https://cf.junzhen.qzz.io/best_ips.txt',
@@ -251,7 +252,7 @@ const EXTERNAL_SOURCES = {
 };
 
 // ==========================================
-// 核心工具函数
+// 核心工具函数（修复类型检查）
 // ==========================================
 function encodeBase64(str) {
     try {
@@ -269,10 +270,26 @@ function decodeBase64(str) {
     }
 }
 
+// 修复：确保输入是字符串
 function parseIP(ip) {
-    if (!ip) return { displayIp: '', port: '443', name: '' };
+    // 确保是字符串
+    if (typeof ip !== 'string') {
+        ip = String(ip || '');
+    }
+    
+    if (!ip || ip.trim() === '') {
+        return { displayIp: '', port: '443', name: '' };
+    }
+    
+    // 移除首尾空格
+    ip = ip.trim();
+    
+    // 匹配 IP:端口#名称 格式
     const match = ip.match(/^(\[[a-fA-F0-9:]+\]|[^:#\[\]]+)(?::(\d+))?(#.*)?$/);
-    if (!match) return { displayIp: ip, port: '443', name: '' };
+    if (!match) {
+        return { displayIp: ip, port: '443', name: '' };
+    }
+    
     return {
         displayIp: match[1],
         port: match[2] || '443',
@@ -288,7 +305,16 @@ function createErrorNode(msg) {
 // 核心订阅引擎
 // ==========================================
 function multiplexLink(baseLink, ipRow, index) {
-    const { displayIp, port, name } = parseIP(ipRow);
+    // 确保 ipRow 是字符串
+    if (typeof ipRow === 'string') {
+        ipRow = { ip: ipRow, name: '' };
+    }
+    
+    const ipStr = ipRow.ip || ipRow || '';
+    const { displayIp, port, name } = parseIP(ipStr);
+    
+    if (!displayIp) return null;
+    
     const nodeNumber = String(index + 1).padStart(3, '0');
     const nodeName = `☆优选库 | 公益 | 免费 | ${nodeNumber}☆`;
 
@@ -298,10 +324,16 @@ function multiplexLink(baseLink, ipRow, index) {
             const url = new URL(baseLink);
             const originalHost = url.hostname;
             url.hostname = displayIp;
-            if (port && port !== 'N/A') url.port = port;
+            if (port && port !== 'N/A' && port !== '443') {
+                url.port = port;
+            }
             url.hash = nodeName;
-            if (!url.searchParams.has('host') && originalHost) url.searchParams.set('host', originalHost);
-            if (!url.searchParams.has('sni') && originalHost) url.searchParams.set('sni', originalHost);
+            if (!url.searchParams.has('host') && originalHost) {
+                url.searchParams.set('host', originalHost);
+            }
+            if (!url.searchParams.has('sni') && originalHost) {
+                url.searchParams.set('sni', originalHost);
+            }
             return url.toString();
         } 
         // VMess
@@ -311,7 +343,9 @@ function multiplexLink(baseLink, ipRow, index) {
             if (!config.sni) config.sni = config.add;
             if (!config.host) config.host = config.add;
             config.add = displayIp;
-            if (port && port !== 'N/A') config.port = parseInt(port);
+            if (port && port !== 'N/A' && port !== '443') {
+                config.port = parseInt(port);
+            }
             config.ps = nodeName;
             return 'vmess://' + encodeBase64(JSON.stringify(config));
         }
@@ -432,10 +466,10 @@ async function generateSub() {
         showStatus('⏳ 正在拉取优选IP列表...', 'info');
 
         // 3. 拉取优选IP列表
-        let ipRows = [];
+        let ipList = [];
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒超时
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
 
             const response = await fetch(extUrl, {
                 headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
@@ -447,11 +481,11 @@ async function generateSub() {
 
             const text = await response.text();
             
-            // 检查是否是HTML
             if (text.trim().startsWith('<')) {
                 throw new Error('返回的是HTML网页，不是IP列表');
             }
 
+            // 解析IP列表
             const lines = text.split('\n')
                 .map(l => l.trim())
                 .filter(l => l && !l.startsWith('#') && !l.startsWith('//'));
@@ -460,17 +494,8 @@ async function generateSub() {
                 throw new Error('IP列表为空');
             }
 
-            ipRows = lines.map(line => {
-                const { displayIp, port, name } = parseIP(line);
-                return {
-                    ip: port === 'N/A' ? displayIp : `${displayIp}:${port}`,
-                    name: name || '优选节点'
-                };
-            }).filter(r => r.ip);
-
-            if (ipRows.length === 0) {
-                throw new Error('未解析到有效IP');
-            }
+            // 直接存储原始行，后续解析
+            ipList = lines;
 
         } catch (e) {
             if (e.name === 'AbortError') {
@@ -481,15 +506,17 @@ async function generateSub() {
             return;
         }
 
-        showStatus(`✅ 成功获取 ${ipRows.length} 个优选IP，正在生成节点...`, 'success');
+        showStatus(`✅ 成功获取 ${ipList.length} 个IP，正在生成节点...`, 'success');
 
-        // 4. 生成节点（限制数量防止卡顿）
+        // 4. 生成节点
         const MAX_NODES = 500;
-        const processCount = Math.min(ipRows.length, MAX_NODES);
+        const processCount = Math.min(ipList.length, MAX_NODES);
         const generatedLinks = [];
 
         for (let i = 0; i < processCount; i++) {
-            const link = multiplexLink(baseLink, ipRows[i], i);
+            // 直接传递IP字符串
+            const ipStr = ipList[i];
+            const link = multiplexLink(baseLink, ipStr, i);
             if (link) generatedLinks.push(link);
         }
 
@@ -503,7 +530,7 @@ async function generateSub() {
         // 5. 生成订阅（Base64编码）
         const encoded = encodeBase64(finalOutput);
         
-        // 创建下载链接（Data URI方式，兼容性更好）
+        // 创建 data URI
         const dataUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(encoded);
         
         // 显示结果
