@@ -229,6 +229,9 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
 // ==========================================
 // 全局配置
 // ==========================================
+// CORS公共代理，解决跨域无法拉取IP问题
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+
 const PRESET_BASE_LINKS = {
     0: 'vless://4c0b7280-76bb-495c-9c8b-f05712ebf805@www.visa.cn:443?path=%2F&security=tls&encryption=none&insecure=0&host=youxuanku.kdns.fr&fp=chrome&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&allowInsecure=0&sni=youxuanku.kdns.fr#www.visa.cn',
     1: 'vless://4c0b7280-76bb-495c-9c8b-f05712ebf805@cf.877774.xyz:443?path=%2F&security=tls&encryption=none&insecure=0&host=youxuanku.kdns.fr&fp=chrome&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&allowInsecure=0&sni=youxuanku.kdns.fr#cf.877774.xyz',
@@ -312,27 +315,25 @@ function multiplexLink(baseLink, ipRow, index) {
             }
             url.hash = nodeName;
             
-            // 2. 将 host 参数设为优选 IP（让客户端显示IP）
-            url.searchParams.set('host', displayIp);
+            // 2. 删除 host 参数，确保客户端显示 hostname
+            url.searchParams.delete('host');
             
-            // 3. sni 保留原始域名（用于TLS验证）
+            // 3. 保留 sni 不变（如果原本没有，则设为原始域名）
             if (!url.searchParams.has('sni') && originalHost) {
                 url.searchParams.set('sni', originalHost);
             }
-            // 保留 insecure 原值
+            // 不修改 insecure，保留原有值
             
             return url.toString();
         } 
         else if (baseLink.startsWith('vmess://')) {
             const b64 = baseLink.slice(8).replace(/-/g, '+').replace(/_/g, '/');
             const config = JSON.parse(decodeBase64(b64));
-            // VMess：add 设为 IP，host 设为 IP（让客户端显示IP），sni 保留原值
+            // VMess：设置 add 为 IP，保留 sni 和 host 不变
             config.add = displayIp;
             if (port && port !== 'N/A' && port !== '443') {
                 config.port = parseInt(port);
             }
-            config.host = displayIp;  // 让客户端显示IP
-            // sni 保持不变（用于TLS）
             config.ps = nodeName;
             return 'vmess://' + encodeBase64(JSON.stringify(config));
         }
@@ -403,7 +404,7 @@ function hideStatus() {
 }
 
 // ==========================================
-// 生成订阅主函数
+// 生成订阅主函数【核心修改：拼接CORS代理+强化IP过滤】
 // ==========================================
 async function generateSub() {
     const baseLinkId = parseInt(document.getElementById('baseLinkSelect').value);
@@ -448,16 +449,18 @@ async function generateSub() {
             return;
         }
 
-        let extUrl;
+        let originExtUrl;
         if (sourceId === 9) {
-            extUrl = customUrl;
+            originExtUrl = customUrl;
         } else {
-            extUrl = EXTERNAL_SOURCES[sourceId];
-            if (!extUrl) {
+            originExtUrl = EXTERNAL_SOURCES[sourceId];
+            if (!originExtUrl) {
                 showStatus('❌ 无效的IP来源', 'error');
                 return;
             }
         }
+        // 拼接CORS代理绕过跨域
+        const fetchUrl = CORS_PROXY + encodeURIComponent(originExtUrl);
 
         showStatus('⏳ 正在拉取优选IP列表...', 'info');
 
@@ -466,7 +469,7 @@ async function generateSub() {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-            const response = await fetch(extUrl, {
+            const response = await fetch(fetchUrl, {
                 headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
                 signal: controller.signal
             });
@@ -480,9 +483,14 @@ async function generateSub() {
                 throw new Error('返回的是HTML网页，不是IP列表');
             }
 
+            // 强化过滤：空行、#注释、//注释、json行全部剔除，只保留纯IP行
             const lines = text.split('\n')
                 .map(l => l.trim())
-                .filter(l => l && !l.startsWith('#') && !l.startsWith('//'));
+                .filter(l => {
+                    if(!l) return false
+                    if(l.startsWith('#') || l.startsWith('//') || l.startsWith('{') || l.startsWith('[')) return false
+                    return true
+                });
 
             if (lines.length === 0) {
                 throw new Error('IP列表为空');
