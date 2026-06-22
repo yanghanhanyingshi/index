@@ -370,7 +370,6 @@ function copyLink() {
 function downloadSub() {
     const res = document.getElementById('subResult');
     if (res.value) {
-        // 下载为 .txt 文件
         const blob = new Blob([res.value], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -513,11 +512,8 @@ async function generateSub() {
         }
 
         const finalOutput = generatedLinks.join('\n');
-        
-        // Base64编码 - 这是正确的订阅格式
         const encoded = encodeBase64(finalOutput);
         
-        // 显示Base64编码的订阅链接
         subResult.value = encoded;
 
         showStatus(`✅ 生成成功！共 ${generatedLinks.length} 个节点`, 'success');
