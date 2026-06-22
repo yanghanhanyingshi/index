@@ -230,9 +230,9 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
 // 全局配置
 // ==========================================
 const PRESET_BASE_LINKS = {
-    0: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@saas.sin.fan:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#%E7%81%B5%E9%B9%BF%E4%BC%98%E9%80%89%20%7C%20Canada%20%7C%20078',
-    1: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@cf.877774.xyz:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#cf.877774.xyz',
-    2: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@www.visa.cn:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#www.visa.cn'
+    0: 'vless://4c0b7280-76bb-495c-9c8b-f05712ebf805@www.visa.cn:443?path=%2F&security=tls&encryption=none&insecure=0&host=youxuanku.kdns.fr&fp=chrome&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&allowInsecure=0&sni=youxuanku.kdns.fr#www.visa.cn',
+    1: 'vless://4c0b7280-76bb-495c-9c8b-f05712ebf805@cf.877774.xyz:443?path=%2F&security=tls&encryption=none&insecure=0&host=youxuanku.kdns.fr&fp=chrome&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&allowInsecure=0&sni=youxuanku.kdns.fr#cf.877774.xyz',
+    2: 'vless://4c0b7280-76bb-495c-9c8b-f05712ebf805@saas.sin.fan:443?path=%2F&security=tls&encryption=none&insecure=0&host=youxuanku.kdns.fr&fp=chrome&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&allowInsecure=0&sni=youxuanku.kdns.fr#saas.sin.fan'
 };
 
 const EXTERNAL_SOURCES = {
@@ -299,35 +299,40 @@ function multiplexLink(baseLink, ipRow, index) {
     if (!displayIp) return null;
     
     const nodeNumber = String(index + 1).padStart(3, '0');
-    // 修改节点名称，加入优选IP地址，便于客户端显示
     const nodeName = `☆优选库 | ${displayIp} | ${nodeNumber}☆`;
 
     try {
         if (baseLink.startsWith('vless://') || baseLink.startsWith('trojan://')) {
             const url = new URL(baseLink);
             const originalHost = url.hostname;
+            // 1. 替换 hostname 为优选 IP
             url.hostname = displayIp;
             if (port && port !== 'N/A' && port !== '443') {
                 url.port = port;
             }
             url.hash = nodeName;
-            if (!url.searchParams.has('host') && originalHost) {
-                url.searchParams.set('host', originalHost);
-            }
+            
+            // 2. 将 host 参数设为优选 IP（让客户端显示IP）
+            url.searchParams.set('host', displayIp);
+            
+            // 3. sni 保留原始域名（用于TLS验证）
             if (!url.searchParams.has('sni') && originalHost) {
                 url.searchParams.set('sni', originalHost);
             }
+            // 保留 insecure 原值
+            
             return url.toString();
         } 
         else if (baseLink.startsWith('vmess://')) {
             const b64 = baseLink.slice(8).replace(/-/g, '+').replace(/_/g, '/');
             const config = JSON.parse(decodeBase64(b64));
-            if (!config.sni) config.sni = config.add;
-            if (!config.host) config.host = config.add;
+            // VMess：add 设为 IP，host 设为 IP（让客户端显示IP），sni 保留原值
             config.add = displayIp;
             if (port && port !== 'N/A' && port !== '443') {
                 config.port = parseInt(port);
             }
+            config.host = displayIp;  // 让客户端显示IP
+            // sni 保持不变（用于TLS）
             config.ps = nodeName;
             return 'vmess://' + encodeBase64(JSON.stringify(config));
         }
