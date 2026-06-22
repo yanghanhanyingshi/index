@@ -299,37 +299,44 @@ function multiplexLink(baseLink, ipRow, index) {
     if (!displayIp) return null;
     
     const nodeNumber = String(index + 1).padStart(3, '0');
-    // 修改节点名称，加入优选IP地址，便于客户端显示
     const nodeName = `☆优选库 | ${displayIp} | ${nodeNumber}☆`;
 
     try {
         if (baseLink.startsWith('vless://') || baseLink.startsWith('trojan://')) {
             const url = new URL(baseLink);
             const originalHost = url.hostname;
-            // 替换 hostname 为优选IP
+            // 1. 替换 hostname 为优选 IP
             url.hostname = displayIp;
             if (port && port !== 'N/A' && port !== '443') {
                 url.port = port;
             }
             url.hash = nodeName;
             
-            // 删除 host 参数，让客户端显示 hostname（IP）
+            // 2. 删除 host 参数（避免客户端显示域名）
             url.searchParams.delete('host');
-            // 保留 sni 为原始域名（用于 TLS），如果不存在则设置
-            if (!url.searchParams.has('sni') && originalHost) {
-                url.searchParams.set('sni', originalHost);
-            }
+            
+            // 3. 将 sni 设置为优选 IP（这样客户端“服务器地址”显示 IP）
+            url.searchParams.set('sni', displayIp);
+            
+            // 4. 开启 insecure 跳过证书验证（因为 IP 证书通常不匹配）
+            //    同时设置 allowInsecure=1 以确保兼容
+            url.searchParams.set('insecure', '1');
+            url.searchParams.set('allowInsecure', '1');
+            
             return url.toString();
         } 
         else if (baseLink.startsWith('vmess://')) {
             const b64 = baseLink.slice(8).replace(/-/g, '+').replace(/_/g, '/');
             const config = JSON.parse(decodeBase64(b64));
-            if (!config.sni) config.sni = config.add;
-            if (!config.host) config.host = config.add;
+            // VMess 类似处理：将 add 设为 IP，sni 和 host 设为 IP，并开启 insecure
             config.add = displayIp;
             if (port && port !== 'N/A' && port !== '443') {
                 config.port = parseInt(port);
             }
+            config.sni = displayIp;
+            config.host = displayIp; // 设置 host 为 IP，也可删除 host 但 VMess 中 host 常用于伪装，此处设为 IP
+            config.insecure = 1;
+            config.allowInsecure = 1;
             config.ps = nodeName;
             return 'vmess://' + encodeBase64(JSON.stringify(config));
         }
