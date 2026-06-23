@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>优选库</title>
-<link rel="icon" sizes="56x56" href="https://pan.ling-lu-02.ccwu.cc/raw/------/2.jpg">
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<link rel="icon" sizes="56x56" href="https://pan.ling-lu-02.ccwu.cc/raw/------/9527.jpg">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
@@ -114,13 +113,13 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
 #subResult { 
     background: rgba(0,0,0,0.5); 
     color: #60a5fa; 
-    font-size: 14px; 
+    font-size: 13px; 
     cursor: pointer; 
     padding: 14px 16px;
     border-radius: 12px;
     border: 1px solid rgba(96, 165, 250, 0.2);
     word-break: break-all;
-    width: 100%;
+    min-height: 50px;
 }
 .footer { 
     margin-top: 24px; 
@@ -129,36 +128,67 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     color: #64748b; 
     line-height: 1.8; 
 }
-#qrWrap { display: none; justify-content: center; margin-top: 20px; }
-#qrCodeBox { background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-#qrCodeBox img { display: block; }
-#customBaseGroup, #customUrlGroup { display: none; margin-top: 8px; }
-.loading-text { color: #94a3b8; font-size: 13px; text-align: center; margin-top: 8px; }
-.hidden { display: none; }
-.status-box {
+#customBaseGroup, #customUrlGroup {
+    display: none;
+    margin-top: 8px;
+}
+
+#progressBar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
     margin-top: 12px;
-    padding: 12px 16px;
-    border-radius: 12px;
-    font-size: 13px;
+    overflow: hidden;
     display: none;
 }
-.status-box.success {
-    display: block;
-    background: rgba(34, 197, 94, 0.15);
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    color: #4ade80;
+#progressBar .fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #3b82f6, #a78bfa);
+    border-radius: 2px;
+    transition: width 0.3s ease;
 }
-.status-box.error {
-    display: block;
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #f87171;
+
+.result-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 8px;
+    padding: 0 4px;
 }
-.status-box.info {
-    display: block;
-    background: rgba(96, 165, 250, 0.15);
-    border: 1px solid rgba(96, 165, 250, 0.3);
+.result-stats span { 
+    background: rgba(255,255,255,0.05); 
+    padding: 2px 10px; 
+    border-radius: 10px; 
+}
+
+.copy-btn {
+    margin-top: 8px;
+    padding: 8px 16px;
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 8px;
     color: #60a5fa;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: auto;
+    display: inline-block;
+}
+.copy-btn:hover {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+.btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+.btn-row .copy-btn {
+    flex: 1;
+    text-align: center;
 }
 
 @media (max-width: 480px) {
@@ -169,6 +199,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     button { padding: 14px; font-size: 15px; }
     .avatar { width: 56px; height: 56px; }
 }
+
 @supports (padding: max(0px)) {
     body { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
 }
@@ -176,15 +207,15 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
 </head>
 <body>
 <div class="card">
-    <div class="avatar"><img src="https://pan.ling-lu-02.ccwu.cc/raw/------/2.jpg" alt="Logo"></div>
+    <div class="avatar"><img src="https://pan.ling-lu-02.ccwu.cc/raw/------/9527.jpg" alt="Logo"></div>
     <h1>优选订阅</h1>
     
     <div class="form-group">
         <label>基础节点</label>
         <select id="baseLinkSelect" onchange="toggleCustomBase()">
-            <option value="0">🌐 基础节点 ①</option>
-            <option value="1">🔄 基础节点 ②</option>
-            <option value="2">🔄 基础节点 ③</option>
+            <option value="0">🌐 基础节点 ① (visa.cn)</option>
+            <option value="1">🌐 基础节点 ② (cf.877774.xyz)</option>
+            <option value="2">🌐 基础节点 ③ (saas.sin.fan)</option>
             <option value="3">✍️ 自定义节点</option>
         </select>
         <div id="customBaseGroup">
@@ -212,88 +243,82 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow
     </div>
 
     <button onclick="generateSub()" id="genBtn">🚀 生成优选订阅</button>
-    <div id="loadingMsg" class="loading-text hidden">⏳ 正在获取优选IP并生成订阅，请稍候...</div>
-    <div id="statusBox" class="status-box"></div>
     
-    <div class="form-group" style="margin-top: 20px;">
-        <label>📋 您的订阅链接（点击复制）</label>
-        <input type="text" id="subResult" placeholder="点击生成后自动出现" readonly onclick="copyLink()">
+    <div id="progressBar"><div class="fill" id="progressFill"></div></div>
+    
+    <div class="form-group" style="margin-top: 16px;">
+        <label>📋 Base64 编码订阅链接</label>
+        <input type="text" id="subResult" placeholder="点击生成后自动出现" readonly onclick="this.select()">
     </div>
     
-    <div id="qrWrap">
-        <div id="qrCodeBox"></div>
+    <div class="btn-row">
+        <button class="copy-btn" onclick="copyLink()">📋 复制链接</button>
+        <button class="copy-btn" onclick="downloadSub()">💾 下载文件</button>
+    </div>
+    
+    <div class="result-stats" id="statsBar" style="display:none;">
+        <span id="nodeCount">节点数: 0</span>
+        <span id="sourceInfo">来源: -</span>
     </div>
 
-    <div class="footer">优选库 &copy; 2026 | 纯前端生成</div>
+    <div class="footer">
+        优选库 &copy; 2026
+    </div>
 </div>
 <script>
 // ==========================================
-// 全局配置
+// 预设配置
 // ==========================================
-// 预设基础节点
-const PRESET_BASE_LINKS = {
-    0: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@saas.sin.fan:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#%E7%81%B5%E9%B9%BF%E4%BC%98%E9%80%89%20%7C%20Canada%20%7C%20078',
-    1: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@cf.877774.xyz:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#cf.877774.xyz',
-    2: 'vless://0c6f62ee-daf7-45ea-81a0-5e2c41d327e3@www.visa.cn:443?encryption=none&security=tls&sni=linglutv.cc.cd&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=linglutv.cc.cd&path=%2Fproxyip%3D185.81.28.151%2C138.2.64.229%2C139.180.208.63%2C152.42.200.162%2C167.71.221.62%2C66.42.61.215#www.visa.cn'
-};
+const PRESET_BASE_LINKS = [
+    { id: 0, link: 'vless://4c0b7280-76bb-495c-9c8b-f05712ebf805@www.visa.cn:443?security=tls&type=ws&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&host=youxuanku.kdns.fr&fp=chrome&sni=youxuanku.kdns.fr&path=%2F&encryption=none#www.visa.cn' },
+    { id: 1, link: 'vless://4c0b7280-76bb-495c-9c8b-f05712ebf805@cf.877774.xyz:443?security=tls&type=ws&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&host=youxuanku.kdns.fr&fp=chrome&sni=youxuanku.kdns.fr&path=%2F&encryption=none#cf.877774.xyz' },
+    { id: 2, link: 'vless://4c0b7280-76bb-495c-9c8b-f05712ebf805@saas.sin.fan:443?security=tls&type=ws&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&host=youxuanku.kdns.fr&fp=chrome&sni=youxuanku.kdns.fr&path=%2F&encryption=none#saas.sin.fan' }
+];
 
-// 外部优选库
-const EXTERNAL_SOURCES = {
-    0: 'https://cf.junzhen.qzz.io/best_ips_bj.txt',
-    1: 'https://cf.junzhen.qzz.io/best_ips.txt',
-    2: 'https://raw.githubusercontent.com/yanghanhanyingshi/cf-linglu/refs/heads/main/linglu-03.txt',
-    3: 'https://raw.githubusercontent.com/yanghanhanyingshi/cf-linglu/refs/heads/main/vps789-100.txt',
-    4: 'https://raw.githubusercontent.com/yanghanhanyingshi/cf-linglu/refs/heads/main/qilin_ip.txt',
-    5: 'https://raw.githubusercontent.com/xiagefei/CFBestIP/refs/heads/main/addressesapi.txt',
-    6: 'https://raw.githubusercontent.com/svip-s/cloudflare_ip/refs/heads/main/best_ips.txt',
-    7: 'https://bestcf.pages.dev/luoli/all.txt',
-    8: 'https://raw.githubusercontent.com/cmliu/WorkerVless2sub/main/addressesapi.txt'
-};
+const EXTERNAL_SOURCES = [
+    { id: 0, name: '🦍 动态测速 API - 电信优先', url: 'https://cf.junzhen.qzz.io/best_ips_bj.txt' },
+    { id: 1, name: '🦘 动态测速 API - 联通优先', url: 'https://cf.junzhen.qzz.io/best_ips.txt' },
+    { id: 2, name: '🦌 灵鹿优选 (推荐)', url: 'https://raw.githubusercontent.com/yanghanhanyingshi/cf-linglu/refs/heads/main/linglu-03.txt' },
+    { id: 3, name: '🐆 vps789 (推荐)', url: 'https://raw.githubusercontent.com/yanghanhanyingshi/cf-linglu/refs/heads/main/vps789-100.txt' },
+    { id: 4, name: '🐈 麒麟优选 (推荐)', url: 'https://raw.githubusercontent.com/yanghanhanyingshi/cf-linglu/refs/heads/main/qilin_ip.txt' },
+    { id: 5, name: '🐅 红星优选 (推荐)', url: 'https://raw.githubusercontent.com/xiagefei/CFBestIP/refs/heads/main/addressesapi.txt' },
+    { id: 6, name: '🐘 动态测速 API - 移动优先', url: 'https://raw.githubusercontent.com/svip-s/cloudflare_ip/refs/heads/main/best_ips.txt' },
+    { id: 7, name: '🐖 动态测速 API - 通用官方', url: 'https://bestcf.pages.dev/luoli/all.txt' },
+    { id: 8, name: '🐒 静态 TXT 库 - cmliu (备用)', url: 'https://raw.githubusercontent.com/cmliu/WorkerVless2sub/main/addressesapi.txt' }
+];
 
 // ==========================================
 // 核心工具函数
 // ==========================================
-function encodeBase64(str) {
-    try {
-        return btoa(unescape(encodeURIComponent(str)));
-    } catch (e) {
-        return btoa(str);
-    }
-}
+const encodeBase64 = (str) => btoa(unescape(encodeURIComponent(str)));
+const decodeBase64 = (str) => decodeURIComponent(escape(atob(str)));
 
-function decodeBase64(str) {
-    try {
-        return decodeURIComponent(escape(atob(str)));
-    } catch (e) {
-        return atob(str);
-    }
-}
+const IP_FORMAT_REGEX = /^(\[[a-fA-F0-9:]+\]|[^:#\[\]]+)(?::(\d+))?(#.*)?$/;
 
-function parseIP(ip) {
+const parseIP = (ip) => {
     if (!ip) return { displayIp: '', port: '443', name: '' };
-    const match = ip.match(/^(\[[a-fA-F0-9:]+\]|[^:#\[\]]+)(?::(\d+))?(#.*)?$/);
+    const match = ip.match(IP_FORMAT_REGEX);
     if (!match) return { displayIp: ip, port: '443', name: '' };
     return {
         displayIp: match[1],
         port: match[2] || '443',
         name: (match[3] || '').slice(1),
     };
-}
+};
 
-function createErrorNode(msg) {
+const createErrorNode = (msg) => {
     return `vless://00000000-0000-0000-0000-000000000000@127.0.0.1:80?encryption=none&security=none&type=tcp#${encodeURIComponent(msg)}`;
-}
+};
 
 // ==========================================
-// 核心订阅引擎
+// 核心订阅生成引擎
 // ==========================================
-function multiplexLink(baseLink, ipRow, index) {
-    const { displayIp, port, name } = parseIP(ipRow);
+const multiplexLink = (baseLink, premiumIpRow, index) => {
+    const { displayIp, port, name } = parseIP(premiumIpRow.ip);
     const nodeNumber = String(index + 1).padStart(3, '0');
     const nodeName = `☆优选库 | 公益 | 免费 | ${nodeNumber}☆`;
 
     try {
-        // VLESS / Trojan
         if (baseLink.startsWith('vless://') || baseLink.startsWith('trojan://')) {
             const url = new URL(baseLink);
             const originalHost = url.hostname;
@@ -304,7 +329,6 @@ function multiplexLink(baseLink, ipRow, index) {
             if (!url.searchParams.has('sni') && originalHost) url.searchParams.set('sni', originalHost);
             return url.toString();
         } 
-        // VMess
         else if (baseLink.startsWith('vmess://')) {
             const b64 = baseLink.slice(8).replace(/-/g, '+').replace(/_/g, '/');
             const config = JSON.parse(decodeBase64(b64));
@@ -312,18 +336,39 @@ function multiplexLink(baseLink, ipRow, index) {
             if (!config.host) config.host = config.add;
             config.add = displayIp;
             if (port && port !== 'N/A') config.port = parseInt(port);
-            config.ps = nodeName;
+            config.ps = nodeName; 
             return 'vmess://' + encodeBase64(JSON.stringify(config));
         }
     } catch (e) {
-        console.warn('生成节点失败:', e.message);
         return null;
     }
     return null;
-}
+};
 
 // ==========================================
-// UI控制
+// 拉取IP列表
+// ==========================================
+const fetchIPList = async (url) => {
+    const response = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+    });
+    if (!response.ok) throw new Error(`HTTP状态码异常: ${response.status}`);
+    const text = await response.text();
+    if (text.trim().startsWith('<')) {
+        throw new Error('获取到的是网页而非纯文本列表');
+    }
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+    return lines.map(line => {
+        const { displayIp, port, name } = parseIP(line);
+        return { 
+            ip: port === 'N/A' ? displayIp : `${displayIp}:${port}`, 
+            name: name || '优选节点' 
+        };
+    }).filter(r => r.ip);
+};
+
+// ==========================================
+// UI 控制
 // ==========================================
 function toggleCustomBase() {
     const select = document.getElementById('baseLinkSelect');
@@ -339,214 +384,165 @@ function toggleCustomUrl() {
 
 function copyLink() {
     const res = document.getElementById('subResult');
-    if (res.value) {
-        res.select();
+    if(res.value) { 
+        res.select(); 
+        document.execCommand('copy'); 
+        alert('✅ 订阅链接已复制！');
+    }
+}
+
+function downloadSub() {
+    const res = document.getElementById('subResult');
+    if(res.value) {
         try {
-            navigator.clipboard.writeText(res.value);
-            showStatus('✅ 订阅链接已复制！', 'success');
-        } catch (e) {
-            document.execCommand('copy');
-            showStatus('✅ 订阅链接已复制！', 'success');
+            // 解码Base64获取原始内容
+            const decoded = decodeBase64(res.value);
+            const blob = new Blob([decoded], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `优选订阅_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch(e) {
+            alert('下载失败: ' + e.message);
         }
     }
 }
 
-function showStatus(msg, type = 'info') {
-    const box = document.getElementById('statusBox');
-    box.className = 'status-box ' + type;
-    box.textContent = msg;
-    box.style.display = 'block';
-}
-
-function hideStatus() {
-    const box = document.getElementById('statusBox');
-    box.style.display = 'none';
+function updateProgress(percent) {
+    const fill = document.getElementById('progressFill');
+    const bar = document.getElementById('progressBar');
+    bar.style.display = 'block';
+    fill.style.width = Math.min(percent, 100) + '%';
 }
 
 // ==========================================
-// 生成订阅主函数
+// 主生成函数
 // ==========================================
 async function generateSub() {
     const baseLinkId = parseInt(document.getElementById('baseLinkSelect').value);
     const customBaseLink = document.getElementById('customBaseLink').value.trim();
     const sourceId = parseInt(document.getElementById('extUrlSelect').value);
     const customUrl = document.getElementById('customUrl').value.trim();
-
-    // 验证
+    
+    // 验证输入
     if (baseLinkId === 3 && !customBaseLink) {
-        showStatus('❌ 请填写自定义节点链接！', 'error');
+        alert('请填写自定义节点链接！');
         return;
     }
     if (sourceId === 9 && !customUrl) {
-        showStatus('❌ 请填写自定义链接！', 'error');
+        alert('请填写自定义链接！');
         return;
     }
 
     const btn = document.getElementById('genBtn');
-    const loadingMsg = document.getElementById('loadingMsg');
-    const subResult = document.getElementById('subResult');
-    const qrWrap = document.getElementById('qrWrap');
-    const qrCodeBox = document.getElementById('qrCodeBox');
-
-    // 重置状态
-    subResult.value = '';
-    qrWrap.style.display = 'none';
-    qrCodeBox.innerHTML = '';
-    hideStatus();
-
-    btn.innerText = '⏳ 生成中...';
+    const originalText = btn.innerText;
+    btn.innerText = "⏳ 加载中..."; 
     btn.disabled = true;
-    loadingMsg.classList.remove('hidden');
+    
+    // 重置显示
+    document.getElementById('statsBar').style.display = 'none';
+    document.getElementById('subResult').value = '';
+    updateProgress(0);
 
     try {
-        // 1. 获取基础节点
-        let baseLink;
+        // 1. 获取基础节点链接
+        let baseLink = '';
         if (baseLinkId === 3) {
             baseLink = customBaseLink;
         } else {
-            baseLink = PRESET_BASE_LINKS[baseLinkId];
-            if (!baseLink) {
-                showStatus('❌ 无效的基础节点', 'error');
+            const preset = PRESET_BASE_LINKS.find(p => p.id === baseLinkId);
+            if (!preset) {
+                alert('无效的基础节点ID');
                 return;
             }
+            baseLink = preset.link;
         }
+        updateProgress(20);
 
-        // 验证基础节点格式
-        if (!baseLink.startsWith('vless://') && !baseLink.startsWith('vmess://') && !baseLink.startsWith('trojan://')) {
-            showStatus('❌ 基础节点格式无效，请检查链接', 'error');
-            return;
-        }
-
-        // 2. 获取优选IP源
-        let extUrl;
+        // 2. 获取优选IP来源
+        let extUrl = '';
         if (sourceId === 9) {
             extUrl = customUrl;
         } else {
-            extUrl = EXTERNAL_SOURCES[sourceId];
-            if (!extUrl) {
-                showStatus('❌ 无效的IP来源', 'error');
+            const source = EXTERNAL_SOURCES.find(s => s.id === sourceId);
+            if (!source) {
+                alert('无效的源ID');
                 return;
             }
+            extUrl = source.url;
         }
+        updateProgress(30);
 
-        showStatus('⏳ 正在拉取优选IP列表...', 'info');
-
-        // 3. 拉取优选IP列表
-        let ipRows = [];
+        // 3. 拉取IP列表
+        let ipRows;
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒超时
-
-            const response = await fetch(extUrl, {
-                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-            const text = await response.text();
-            
-            // 检查是否是HTML
-            if (text.trim().startsWith('<')) {
-                throw new Error('返回的是HTML网页，不是IP列表');
-            }
-
-            const lines = text.split('\n')
-                .map(l => l.trim())
-                .filter(l => l && !l.startsWith('#') && !l.startsWith('//'));
-
-            if (lines.length === 0) {
-                throw new Error('IP列表为空');
-            }
-
-            ipRows = lines.map(line => {
-                const { displayIp, port, name } = parseIP(line);
-                return {
-                    ip: port === 'N/A' ? displayIp : `${displayIp}:${port}`,
-                    name: name || '优选节点'
-                };
-            }).filter(r => r.ip);
-
-            if (ipRows.length === 0) {
-                throw new Error('未解析到有效IP');
-            }
-
+            ipRows = await fetchIPList(extUrl);
         } catch (e) {
-            if (e.name === 'AbortError') {
-                showStatus('❌ 请求超时，请检查网络或更换IP来源', 'error');
-            } else {
-                showStatus(`❌ 拉取优选IP失败: ${e.message}`, 'error');
-            }
+            alert('拉取IP列表失败: ' + e.message);
+            return;
+        }
+        updateProgress(60);
+
+        if (ipRows.length === 0) {
+            alert('未获取到任何IP，请检查来源链接是否有效');
             return;
         }
 
-        showStatus(`✅ 成功获取 ${ipRows.length} 个优选IP，正在生成节点...`, 'success');
-
-        // 4. 生成节点（限制数量防止卡顿）
-        const MAX_NODES = 500;
-        const processCount = Math.min(ipRows.length, MAX_NODES);
-        const generatedLinks = [];
-
-        for (let i = 0; i < processCount; i++) {
-            const link = multiplexLink(baseLink, ipRows[i], i);
-            if (link) generatedLinks.push(link);
-        }
+        // 4. 生成节点
+        const generatedLinks = ipRows
+            .map((row, index) => multiplexLink(baseLink, row, index))
+            .filter(Boolean);
+        
+        updateProgress(80);
 
         if (generatedLinks.length === 0) {
-            showStatus('❌ 没有生成任何可用节点，请检查基础节点格式', 'error');
+            alert('生成节点失败，请检查基础节点链接是否正确');
             return;
         }
 
+        // 5. 生成最终输出并Base64编码
         const finalOutput = generatedLinks.join('\n');
-
-        // 5. 生成订阅（Base64编码）
-        const encoded = encodeBase64(finalOutput);
+        const encodedOutput = encodeBase64(finalOutput);
         
-        // 创建下载链接（Data URI方式，兼容性更好）
-        const dataUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(encoded);
-        
-        // 显示结果
-        subResult.value = dataUri;
+        // 6. 显示结果
+        document.getElementById('subResult').value = encodedOutput;
+        updateProgress(100);
 
-        // 6. 生成二维码
-        qrCodeBox.innerHTML = '';
-        qrWrap.style.display = 'flex';
-        try {
-            new QRCode(qrCodeBox, {
-                text: dataUri,
-                width: 160,
-                height: 160,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.M
-            });
-        } catch (e) {
-            console.warn('二维码生成失败:', e);
-            qrWrap.style.display = 'none';
-        }
+        // 更新统计信息
+        document.getElementById('nodeCount').textContent = `节点数: ${generatedLinks.length}`;
+        const sourceName = sourceId === 9 ? '自定义' : EXTERNAL_SOURCES.find(s => s.id === sourceId)?.name || '未知';
+        document.getElementById('sourceInfo').textContent = `来源: ${sourceName}`;
+        document.getElementById('statsBar').style.display = 'flex';
 
-        showStatus(`✅ 生成成功！共 ${generatedLinks.length} 个节点`, 'success');
+        btn.innerText = "✅ 生成成功!";
 
     } catch (e) {
-        console.error('生成失败:', e);
-        showStatus(`❌ 生成失败: ${e.message}`, 'error');
+        alert('生成失败: ' + e.message);
+        console.error(e);
+        btn.innerText = originalText;
     } finally {
-        btn.innerText = '🚀 生成优选订阅';
-        btn.disabled = false;
-        loadingMsg.classList.add('hidden');
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.disabled = false;
+            setTimeout(() => {
+                document.getElementById('progressBar').style.display = 'none';
+            }, 3000);
+        }, 2000);
     }
 }
 
 // ==========================================
-// 初始化
+// 页面初始化
 // ==========================================
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('baseLinkSelect').value = '0';
     document.getElementById('extUrlSelect').value = '2';
     toggleCustomBase();
     toggleCustomUrl();
-    showStatus('💡 选择基础节点和IP来源，点击生成', 'info');
 });
 </script>
 </body>
