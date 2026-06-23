@@ -311,7 +311,7 @@ const createErrorNode = (msg) => {
 };
 
 // ==========================================
-// 核心订阅生成引擎 - 修复地址同步问题
+// 核心订阅生成引擎 - 只替换 address 和 host，保留 sni
 // ==========================================
 const multiplexLink = (baseLink, premiumIpRow, index) => {
     const { displayIp, port, name } = parseIP(premiumIpRow.ip);
@@ -321,9 +321,12 @@ const multiplexLink = (baseLink, premiumIpRow, index) => {
     try {
         if (baseLink.startsWith('vless://')) {
             const url = new URL(baseLink);
-            const originalHost = url.hostname;
             
-            // ★ 关键修复：替换 address (hostname)
+            // 保存原始 sni（必须保留，否则 TLS 握手失败）
+            const originalSni = url.searchParams.get('sni');
+            const originalHost = url.searchParams.get('host');
+            
+            // ★ 替换 address (hostname) 为优选IP
             url.hostname = displayIp;
             
             // 替换端口
@@ -331,13 +334,14 @@ const multiplexLink = (baseLink, premiumIpRow, index) => {
                 url.port = port;
             }
             
-            // ★ 关键修复：同时替换 host 和 sni 为优选IP，确保手机端显示正确
-            // 但保留原始域名作为备用，部分客户端需要 host 为域名才能使用 ECH
-            // 这里将 host 和 sni 都设置为优选IP，确保地址同步
+            // ★ 替换 host 为优选IP（手机端显示用）
             url.searchParams.set('host', displayIp);
-            url.searchParams.set('sni', displayIp);
             
-            // 如果原始链接有 path，保留
+            // ★ 关键：SNI 保持不变！必须用原始域名
+            if (originalSni) {
+                url.searchParams.set('sni', originalSni);
+            }
+            
             // 设置节点名称
             url.hash = nodeName;
             
@@ -345,15 +349,17 @@ const multiplexLink = (baseLink, premiumIpRow, index) => {
         } 
         else if (baseLink.startsWith('trojan://')) {
             const url = new URL(baseLink);
-            const originalHost = url.hostname;
+            const originalSni = url.searchParams.get('sni');
             
             url.hostname = displayIp;
             if (port && port !== 'N/A') {
                 url.port = port;
             }
             
-            // Trojan 也替换 sni
-            url.searchParams.set('sni', displayIp);
+            // Trojan 也保留 sni
+            if (originalSni) {
+                url.searchParams.set('sni', originalSni);
+            }
             url.hash = nodeName;
             
             return url.toString();
@@ -362,10 +368,17 @@ const multiplexLink = (baseLink, premiumIpRow, index) => {
             const b64 = baseLink.slice(8).replace(/-/g, '+').replace(/_/g, '/');
             const config = JSON.parse(decodeBase64(b64));
             
-            // ★ 关键修复：替换所有地址相关字段
-            config.add = displayIp;           // 主地址
-            config.host = displayIp;          // host 字段
-            config.sni = displayIp;           // sni 字段
+            // 保存原始 sni
+            const originalSni = config.sni || config.add;
+            
+            // ★ 替换 address 为优选IP
+            config.add = displayIp;
+            
+            // ★ 替换 host 为优选IP（手机端显示用）
+            config.host = displayIp;
+            
+            // ★ 关键：SNI 保持不变！
+            config.sni = originalSni;
             
             if (port && port !== 'N/A') {
                 config.port = parseInt(port);
@@ -373,7 +386,6 @@ const multiplexLink = (baseLink, premiumIpRow, index) => {
             
             config.ps = nodeName;
             
-            // 移除可能残留的原始域名
             return 'vmess://' + encodeBase64(JSON.stringify(config));
         }
     } catch (e) {
