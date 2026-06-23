@@ -311,7 +311,7 @@ const createErrorNode = (msg) => {
 };
 
 // ==========================================
-// 核心订阅生成引擎 - 只替换 address 和 host，保留 sni
+// 核心订阅生成引擎
 // ==========================================
 const multiplexLink = (baseLink, premiumIpRow, index) => {
     const { displayIp, port, name } = parseIP(premiumIpRow.ip);
@@ -319,77 +319,27 @@ const multiplexLink = (baseLink, premiumIpRow, index) => {
     const nodeName = `☆优选库 | 公益 | 免费 | ${nodeNumber}☆`;
 
     try {
-        if (baseLink.startsWith('vless://')) {
+        if (baseLink.startsWith('vless://') || baseLink.startsWith('trojan://')) {
             const url = new URL(baseLink);
-            
-            // 保存原始 sni（必须保留，否则 TLS 握手失败）
-            const originalSni = url.searchParams.get('sni');
-            const originalHost = url.searchParams.get('host');
-            
-            // ★ 替换 address (hostname) 为优选IP
+            const originalHost = url.hostname;
             url.hostname = displayIp;
-            
-            // 替换端口
-            if (port && port !== 'N/A') {
-                url.port = port;
-            }
-            
-            // ★ 替换 host 为优选IP（手机端显示用）
-            url.searchParams.set('host', displayIp);
-            
-            // ★ 关键：SNI 保持不变！必须用原始域名
-            if (originalSni) {
-                url.searchParams.set('sni', originalSni);
-            }
-            
-            // 设置节点名称
+            if (port && port !== 'N/A') url.port = port;
             url.hash = nodeName;
-            
+            if (!url.searchParams.has('host') && originalHost) url.searchParams.set('host', originalHost);
+            if (!url.searchParams.has('sni') && originalHost) url.searchParams.set('sni', originalHost);
             return url.toString();
         } 
-        else if (baseLink.startsWith('trojan://')) {
-            const url = new URL(baseLink);
-            const originalSni = url.searchParams.get('sni');
-            
-            url.hostname = displayIp;
-            if (port && port !== 'N/A') {
-                url.port = port;
-            }
-            
-            // Trojan 也保留 sni
-            if (originalSni) {
-                url.searchParams.set('sni', originalSni);
-            }
-            url.hash = nodeName;
-            
-            return url.toString();
-        }
         else if (baseLink.startsWith('vmess://')) {
             const b64 = baseLink.slice(8).replace(/-/g, '+').replace(/_/g, '/');
             const config = JSON.parse(decodeBase64(b64));
-            
-            // 保存原始 sni
-            const originalSni = config.sni || config.add;
-            
-            // ★ 替换 address 为优选IP
+            if (!config.sni) config.sni = config.add;
+            if (!config.host) config.host = config.add;
             config.add = displayIp;
-            
-            // ★ 替换 host 为优选IP（手机端显示用）
-            config.host = displayIp;
-            
-            // ★ 关键：SNI 保持不变！
-            config.sni = originalSni;
-            
-            if (port && port !== 'N/A') {
-                config.port = parseInt(port);
-            }
-            
-            config.ps = nodeName;
-            
+            if (port && port !== 'N/A') config.port = parseInt(port);
+            config.ps = nodeName; 
             return 'vmess://' + encodeBase64(JSON.stringify(config));
         }
     } catch (e) {
-        console.error('生成节点失败:', e);
         return null;
     }
     return null;
@@ -445,6 +395,7 @@ function downloadSub() {
     const res = document.getElementById('subResult');
     if(res.value) {
         try {
+            // 解码Base64获取原始内容
             const decoded = decodeBase64(res.value);
             const blob = new Blob([decoded], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
@@ -477,6 +428,7 @@ async function generateSub() {
     const sourceId = parseInt(document.getElementById('extUrlSelect').value);
     const customUrl = document.getElementById('customUrl').value.trim();
     
+    // 验证输入
     if (baseLinkId === 3 && !customBaseLink) {
         alert('请填写自定义节点链接！');
         return;
@@ -491,11 +443,13 @@ async function generateSub() {
     btn.innerText = "⏳ 加载中..."; 
     btn.disabled = true;
     
+    // 重置显示
     document.getElementById('statsBar').style.display = 'none';
     document.getElementById('subResult').value = '';
     updateProgress(0);
 
     try {
+        // 1. 获取基础节点链接
         let baseLink = '';
         if (baseLinkId === 3) {
             baseLink = customBaseLink;
@@ -509,6 +463,7 @@ async function generateSub() {
         }
         updateProgress(20);
 
+        // 2. 获取优选IP来源
         let extUrl = '';
         if (sourceId === 9) {
             extUrl = customUrl;
@@ -522,6 +477,7 @@ async function generateSub() {
         }
         updateProgress(30);
 
+        // 3. 拉取IP列表
         let ipRows;
         try {
             ipRows = await fetchIPList(extUrl);
@@ -536,6 +492,7 @@ async function generateSub() {
             return;
         }
 
+        // 4. 生成节点
         const generatedLinks = ipRows
             .map((row, index) => multiplexLink(baseLink, row, index))
             .filter(Boolean);
@@ -547,12 +504,15 @@ async function generateSub() {
             return;
         }
 
+        // 5. 生成最终输出并Base64编码
         const finalOutput = generatedLinks.join('\n');
         const encodedOutput = encodeBase64(finalOutput);
         
+        // 6. 显示结果
         document.getElementById('subResult').value = encodedOutput;
         updateProgress(100);
 
+        // 更新统计信息
         document.getElementById('nodeCount').textContent = `节点数: ${generatedLinks.length}`;
         const sourceName = sourceId === 9 ? '自定义' : EXTERNAL_SOURCES.find(s => s.id === sourceId)?.name || '未知';
         document.getElementById('sourceInfo').textContent = `来源: ${sourceName}`;
@@ -575,6 +535,9 @@ async function generateSub() {
     }
 }
 
+// ==========================================
+// 页面初始化
+// ==========================================
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('baseLinkSelect').value = '0';
     document.getElementById('extUrlSelect').value = '2';
